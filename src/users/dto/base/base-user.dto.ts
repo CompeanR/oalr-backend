@@ -1,19 +1,19 @@
-import { IsBoolean, IsDateString, IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import { IsBoolean, IsDateString, IsEmail, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
-class UpdateUserDto {
-    @IsString()
-    @IsOptional()
-    @Length(2, 50)
-    name?: string;
+class UserBase {
+    @IsNumber()
+    id: number;
 
     @IsString()
-    @IsOptional()
     @Length(2, 50)
-    username?: string;
+    name: string;
+
+    @IsString()
+    @Length(2, 50)
+    username: string;
 
     @IsEmail()
-    @IsOptional()
-    email?: string;
+    email: string;
 
     @IsBoolean()
     @IsOptional()
@@ -29,4 +29,4 @@ class UpdateUserDto {
     bio?: string;
 }
 
-export { UpdateUserDto };
+export { UserBase };
