@@ -7,8 +7,8 @@ const typeOrmConfig: TypeOrmModuleOptions = {
     username: 'compean',
     password: 'javier123',
     database: 'oalr',
-    entities: ['dist/**/*.entity{.ts,.js}'],
-    migrations: ['dist/core/migrations/**/*.ts'],
+    entities: ['dist/**/*.entity.{ts,js}'],
+    migrations: ['dist/core/database/migrations/**/*.{ts,js}'],
     synchronize: false,
     logging: false,
 };

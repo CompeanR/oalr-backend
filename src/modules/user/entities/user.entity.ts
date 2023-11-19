@@ -6,16 +6,22 @@ class User {
     id: number;
 
     @Column()
-    name: string;
+    firstName: string;
+
+    @Column()
+    lastName: string;
 
     @Column({ unique: true })
-    username: string;
+    userName: string;
 
     @Column({ unique: true })
     email: string;
 
-    @Column({ select: false })
-    hashedPassword: string;
+    @Column({ type: 'text', nullable: true })
+    hashedPassword: string | null;
+
+    @Column({ default: false })
+    isOauth: boolean;
 
     @Column({ default: true })
     isActive: boolean;
