@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt'; // If you're using JWT
+import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/modules/user/entities/user.entity';
 import { UserService } from 'src/modules/user/user.service';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtPayload } from './interfaces';
 import { OAuthUserDto } from 'src/modules/user/dto/oauth-user-dto';
 import { TokenCreationException } from 'src/common/exceptions/common.exception';
 
@@ -10,7 +10,7 @@ import { TokenCreationException } from 'src/common/exceptions/common.exception';
 class AuthService {
     constructor(
         private readonly userService: UserService,
-        private readonly jwtService: JwtService, // If you're using JWT
+        private readonly jwtService: JwtService,
     ) {}
 
     /**

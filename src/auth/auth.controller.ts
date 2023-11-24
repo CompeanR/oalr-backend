@@ -2,10 +2,9 @@ import { Body, Controller, Get, Post, Req, UseGuards, UseInterceptors } from '@n
 import { UserService } from 'src/modules/user/user.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtPayload, OAuthRequest } from './interfaces';
 import { AuthGuard } from '@nestjs/passport';
 import { OAuthUserInterceptor } from 'src/common/interceptors/oauth-user.interceptor';
-import { OAuthRequest } from './interfaces/oauth-controller.interface';
 
 @Controller('auth')
 class AuthController {
