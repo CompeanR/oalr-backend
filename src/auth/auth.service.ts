@@ -24,7 +24,6 @@ class AuthService {
      */
     public async validateUser(email: string, password: string): Promise<User> {
         const validatedUser = await this.userService.validateUserCredentials(email, password);
-
         if (!validatedUser) {
             throw new UnauthorizedException('Invalid credentials');
         }
@@ -43,13 +42,11 @@ class AuthService {
      */
     public async validateOAuthLogin(profile: OAuthUserDto): Promise<JwtPayload> {
         let user = await this.userService.getUserByEmail(profile.email);
-
         if (!user) {
             user = await this.userService.createOAuthUser(profile);
         }
 
         const token = await this.createTokenForUser(user);
-
         if (!token) {
             throw new TokenCreationException('Failed to validate OAuth login');
         }
@@ -61,10 +58,9 @@ class AuthService {
      * Authenticates a user and returns a JWT payload.
      *
      * @param user The user to authenticate.
-     *
      * @returns A Promise that resolves to a JwtPayload.
      */
-    public async createTokenForUser(user: User): Promise<JwtPayload> {
+    public createTokenForUser(user: User): JwtPayload {
         const payload = { username: user.email, sub: user.id };
         const accessToken = this.jwtService.sign(payload);
 

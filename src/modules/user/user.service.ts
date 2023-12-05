@@ -34,7 +34,6 @@ class UserService {
      */
     public async getUserById(userId: number): Promise<User> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
-
         if (!user) {
             throw new NotFoundException('User not found');
         }
@@ -68,7 +67,6 @@ class UserService {
         });
 
         const savedUser = await this.userRepository.save(user);
-
         return savedUser;
     }
 
@@ -89,7 +87,6 @@ class UserService {
         });
 
         const savedUser = await this.userRepository.save(user);
-
         if (!savedUser) {
             throw new UserCreationException('Failed to create OAuth user');
         }
@@ -119,7 +116,6 @@ class UserService {
      */
     public async deleteUser(userId: number): Promise<DeleteResult> {
         const deletionResponse = await this.userRepository.delete({ id: userId });
-
         if (deletionResponse.affected === 0) {
             throw new NotFoundException('User not found');
         }
@@ -138,13 +134,11 @@ class UserService {
      */
     public async validateUserCredentials(email: string, password: string): Promise<User> {
         const user = await this.getUserByEmail(email);
-
         if (!user) {
             throw new NotFoundException('User not found');
         }
 
         const isPasswordValid = bcrypt.compare(password, user.hashedPassword || '');
-
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid Credentials');
         }

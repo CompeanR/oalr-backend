@@ -11,11 +11,16 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto, UserWithoutPasswordDto } from './dto';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtPayload } from 'src/auth/interfaces';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('users')
+@Controller('user')
 class UserController {
-    constructor(private readonly userService: UserService) {}
+    constructor(
+        private readonly userService: UserService,
+        private readonly authService: AuthService,
+    ) {}
 
     /**
      * Retrieves all users.
@@ -45,12 +50,14 @@ class UserController {
      * Creates a new user.
      *
      * @param user The user data.
-     * @returns The created user without the password.
+     * @returns A promise that resolves to the JWT payload of the created user.
      */
     @Post()
-    public async createUser(@Body() user: CreateUserDto): Promise<UserWithoutPasswordDto> {
+    public async createUser(@Body() user: CreateUserDto): Promise<JwtPayload> {
         const createdUser = await this.userService.createUser(user);
-        return new UserWithoutPasswordDto(createdUser);
+
+        const userToken = this.authService.createTokenForUser(createdUser);
+        return userToken;
     }
 
     /**
