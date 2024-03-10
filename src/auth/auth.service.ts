@@ -37,21 +37,21 @@ class AuthService {
      *
      * @param profile - The OAuth user profile.
      *
-     * @returns A promise that resolves to the JWT payload.
+     * @returns A promise that resolves to the access token.
      * @throws NotFoundException if failed to validate OAuth login.
      */
-    public async validateOAuthLogin(profile: OAuthUserDto): Promise<JwtPayload> {
+    public async validateOAuthLogin(profile: OAuthUserDto): Promise<string> {
         let user = await this.userService.getUserByEmail(profile.email);
         if (!user) {
             user = await this.userService.createOAuthUser(profile);
         }
 
-        const token = await this.createTokenForUser(user);
-        if (!token) {
+        const accessToken = this.createTokenForUser(user).accessToken;
+        if (!accessToken) {
             throw new TokenCreationException('Failed to validate OAuth login');
         }
 
-        return token;
+        return accessToken;
     }
 
     /**

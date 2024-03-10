@@ -10,14 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 @Module({
     imports: [
         UserModule,
-
-        PassportModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                defaultStrategy: configService.get('DEFAULT_STRATEGY', 'google'),
-            }),
-            inject: [ConfigService],
-        }),
+        PassportModule,
 
         JwtModule.registerAsync({
             imports: [ConfigModule],

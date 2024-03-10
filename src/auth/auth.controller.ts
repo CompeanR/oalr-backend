@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from 'src/modules/user/user.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtPayload, OAuthRequest } from './interfaces';
 import { AuthGuard } from '@nestjs/passport';
 import { OAuthUserInterceptor } from 'src/common/interceptors/oauth-user.interceptor';
+import { Response } from 'express';
 
 @Controller('auth')
 class AuthController {
@@ -20,7 +21,7 @@ class AuthController {
     @UseGuards(AuthGuard('google'))
     public async googleAuth(): Promise<void> {}
 
-    /**
+    /*
      * Handles the Google authentication redirect and logs in the user.
      *
      * @param req - The request object containing the authenticated user.
@@ -29,8 +30,9 @@ class AuthController {
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
     @UseInterceptors(OAuthUserInterceptor)
-    public async googleAuthRedirect(@Req() req: OAuthRequest): Promise<JwtPayload> {
-        return this.authService.validateOAuthLogin(req.user);
+    public async googleAuthRedirect(@Req() req: OAuthRequest, @Res() res: Response): Promise<void> {
+        const token = await this.authService.validateOAuthLogin(req.user);
+        res.redirect(`http://localhost:3000/authenticated?token=${token}`);
     }
 
     /**
