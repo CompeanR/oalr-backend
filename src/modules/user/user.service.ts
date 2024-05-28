@@ -138,7 +138,7 @@ class UserService {
             throw new NotFoundException('User not found');
         }
 
-        const isPasswordValid = bcrypt.compare(password, user.hashedPassword || '');
+        const isPasswordValid = await bcrypt.compare(password, user.hashedPassword || '');
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid Credentials');
         }

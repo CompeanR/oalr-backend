@@ -21,11 +21,13 @@ class AuthController {
     @UseGuards(AuthGuard('google'))
     public async googleAuth(): Promise<void> {}
 
-    /*
-     * Handles the Google authentication redirect and logs in the user.
+    /**
+     * Handles the Google authentication redirect.
      *
-     * @param req - The request object containing the authenticated user.
-     * @returns A Promise that resolves to the result of the login operation.
+     * @param req - The request object.
+     * @param res - The response object.
+
+     * @returns A Promise that resolves to void.
      */
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))

@@ -90,10 +90,10 @@ class AllExceptionsFilter implements ExceptionFilter {
      * @returns A formatted error message with the username if found.
      */
     private formatDetailMessage(detail: string): string {
-        // This regex captures the value between the parentheses after "username="
-        const regex = /\(username\)=\((.*?)\)/;
-        const match = detail.match(regex);
+        // This regex captures the value inside the parentheses after "userName" and before "="
+        const regex = /"userName"\)=\(([^)]+)\)/;
 
+        const match = detail.match(regex);
         if (match && match[1]) {
             return `The username '${match[1]}' is already taken.`;
         }
