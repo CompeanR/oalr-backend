@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { OAuthUserDto } from './dto/oauth-user-dto';
-import { UserCreationException } from 'src/common/exceptions/common.exception';
+import { UserCreationException } from 'src/shared/exceptions/common.exception';
 
 /**
  * Service responsible for managing User entities.

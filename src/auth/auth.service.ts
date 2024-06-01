@@ -4,7 +4,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { UserService } from 'src/modules/user/user.service';
 import { JwtPayload } from './interfaces';
 import { OAuthUserDto } from 'src/modules/user/dto/oauth-user-dto';
-import { TokenCreationException } from 'src/common/exceptions/common.exception';
+import { TokenCreationException } from 'src/shared/exceptions/common.exception';
 
 @Injectable()
 class AuthService {

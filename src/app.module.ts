@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './modules/user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { typeOrmConfig } from './core/database/ormconfig';
 import { AuthModule } from './auth/auth.module';

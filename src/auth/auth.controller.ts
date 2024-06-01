@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtPayload, OAuthRequest } from './interfaces';
 import { AuthGuard } from '@nestjs/passport';
-import { OAuthUserInterceptor } from 'src/common/interceptors/oauth-user.interceptor';
+import { OAuthUserInterceptor } from 'src/shared/interceptors/oauth-user.interceptor';
 import { Response } from 'express';
 
 @Controller('auth')
