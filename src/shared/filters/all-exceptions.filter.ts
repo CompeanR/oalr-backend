@@ -9,7 +9,7 @@ import { Request, Response } from 'express';
  */
 @Catch()
 class AllExceptionsFilter implements ExceptionFilter {
-    public catch(exception: IException, host: ArgumentsHost) {
+    public catch(exception: IException, host: ArgumentsHost): void {
         const { response, request } = this.getContext(host);
 
         const status = this.getStatus(exception);

@@ -152,7 +152,7 @@ class UserService {
      * @param lastName - The last name used to generate the username.
      * @returns The generated username.
      */
-    public generateUserName(lastName: string) {
+    public generateUserName(lastName: string): string {
         const userName = lastName.toLowerCase().replace(/\s/g, '');
         return userName + Math.floor(Math.random() * 1000);
     }
