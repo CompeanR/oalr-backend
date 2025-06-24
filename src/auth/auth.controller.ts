@@ -6,6 +6,7 @@ import { JwtPayload, OAuthRequest } from './interfaces';
 import { AuthGuard } from '@nestjs/passport';
 import { OAuthUserInterceptor } from 'src/shared/interceptors/oauth-user.interceptor';
 import { Response } from 'express';
+import { User } from 'src/modules/user/entities/user.entity';
 
 @Controller('auth')
 class AuthController {
@@ -34,7 +35,7 @@ class AuthController {
     @UseInterceptors(OAuthUserInterceptor)
     public async googleAuthRedirect(@Req() req: OAuthRequest, @Res() res: Response): Promise<void> {
         const token = await this.authService.validateOAuthLogin(req.user);
-        res.redirect(`http://localhost:3000/authenticated?token=${token}`);
+        res.redirect(`http://localhost:5173/authenticated?token=${token}`);
     }
 
     /**
@@ -47,6 +48,18 @@ class AuthController {
     public async login(@Body() user: LoginDto): Promise<JwtPayload> {
         const validatedUser = await this.userService.validateUserCredentials(user.email, user.password);
         return this.authService.createTokenForUser(validatedUser);
+    }
+
+    /**
+     * Validates the current JWT token and returns the user information.
+     *
+     * @param req The request object containing the validated user.
+     * @returns A Promise that resolves to the User object.
+     */
+    @Get('validate')
+    @UseGuards(AuthGuard('jwt'))
+    public async validateToken(@Req() req: any): Promise<User> {
+        return this.userService.getUserById(req.user.userId);
     }
 }
 
