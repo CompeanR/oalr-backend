@@ -8,6 +8,7 @@ import { typeOrmConfig } from './core/database/ormconfig';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { validateEnvironment } from './config/validation';
+import { AppLoggerService } from 'src/shared/services/logger.service';
 
 @Module({
     imports: [
@@ -22,10 +23,12 @@ import { validateEnvironment } from './config/validation';
     ],
     controllers: [],
     providers: [
+        AppLoggerService,
         {
             provide: APP_FILTER,
             useClass: AllExceptionsFilter,
         },
     ],
+    exports: [AppLoggerService],
 })
 export class AppModule {}

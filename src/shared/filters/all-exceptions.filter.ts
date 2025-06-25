@@ -3,17 +3,23 @@ import { QueryFailedError } from 'typeorm';
 import { DatabaseErrorCodes } from './utils/errorCodes';
 import { IException } from './interfaces/exception.interface';
 import { Request, Response } from 'express';
+import { AppLoggerService } from 'src/shared/services/logger.service';
 
 /**
  * Catches any unhandled exceptions and sends an appropriate response to the client.
  */
 @Catch()
 class AllExceptionsFilter implements ExceptionFilter {
+    constructor(private readonly logger: AppLoggerService) {}
+
     public catch(exception: IException, host: ArgumentsHost): void {
         const { response, request } = this.getContext(host);
 
         const status = this.getStatus(exception);
         const message = this.getMessage(exception);
+
+        // Log the exception with context
+        this.logException(exception, request, status);
 
         response.status(status).json({
             statusCode: status,
@@ -76,11 +82,50 @@ class AllExceptionsFilter implements ExceptionFilter {
         }
 
         if (exception.hasOwnProperty('message')) {
-            console.error(exception);
             return exception.message;
         }
 
         return 'Internal server error';
+    }
+
+    /**
+     * Logs exception details with context information.
+     *
+     * @param exception The exception that occurred.
+     * @param request The HTTP request object.
+     * @param status The HTTP status code.
+     */
+    private logException(exception: IException, request: Request, status: number): void {
+        const context = {
+            method: request.method,
+            url: request.url,
+            userAgent: request.get('User-Agent'),
+            ip: request.ip,
+            status,
+        };
+
+        if (status >= 500) {
+            // Server errors - log as error with stack trace
+            this.logger.error(
+                `Internal server error: ${exception.message}`,
+                exception.stack,
+                'ExceptionFilter'
+            );
+            this.logger.debug(`Error context: ${JSON.stringify(context)}`, 'ExceptionFilter');
+        } else if (status >= 400) {
+            // Client errors - log as warning
+            this.logger.warn(
+                `Client error: ${exception.message}`,
+                'ExceptionFilter'
+            );
+            this.logger.debug(`Error context: ${JSON.stringify(context)}`, 'ExceptionFilter');
+        } else {
+            // Other exceptions
+            this.logger.log(
+                `Exception handled: ${exception.message}`,
+                'ExceptionFilter'
+            );
+        }
     }
 
     /**
