@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { UserModule } from './modules/user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { validateEnvironment } from './config/validation';
 import { AppLoggerService } from 'src/shared/services/logger.service';
+import { SecurityMiddleware } from 'src/shared/middleware/security.middleware';
 
 @Module({
     imports: [
@@ -31,4 +32,13 @@ import { AppLoggerService } from 'src/shared/services/logger.service';
     ],
     exports: [AppLoggerService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    /**
+     * Configures middleware for the application.
+     *
+     * @param consumer The middleware consumer to apply middleware to routes.
+     */
+    public configure(consumer: MiddlewareConsumer): void {
+        consumer.apply(SecurityMiddleware).forRoutes('*');
+    }
+}

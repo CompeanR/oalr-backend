@@ -106,25 +106,15 @@ class AllExceptionsFilter implements ExceptionFilter {
 
         if (status >= 500) {
             // Server errors - log as error with stack trace
-            this.logger.error(
-                `Internal server error: ${exception.message}`,
-                exception.stack,
-                'ExceptionFilter'
-            );
+            this.logger.error(`Internal server error: ${exception.message}`, exception.stack, 'ExceptionFilter');
             this.logger.debug(`Error context: ${JSON.stringify(context)}`, 'ExceptionFilter');
         } else if (status >= 400) {
             // Client errors - log as warning
-            this.logger.warn(
-                `Client error: ${exception.message}`,
-                'ExceptionFilter'
-            );
+            this.logger.warn(`Client error: ${exception.message}`, 'ExceptionFilter');
             this.logger.debug(`Error context: ${JSON.stringify(context)}`, 'ExceptionFilter');
         } else {
             // Other exceptions
-            this.logger.log(
-                `Exception handled: ${exception.message}`,
-                'ExceptionFilter'
-            );
+            this.logger.log(`Exception handled: ${exception.message}`, 'ExceptionFilter');
         }
     }
 

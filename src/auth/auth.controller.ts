@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/modules/user/user.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -7,12 +8,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { OAuthUserInterceptor } from 'src/shared/interceptors/oauth-user.interceptor';
 import { Response } from 'express';
 import { User } from 'src/modules/user/entities/user.entity';
+import { RateLimitGuard } from 'src/shared/guards/rate-limit.guard';
 
 @Controller('auth')
 class AuthController {
     constructor(
         private userService: UserService,
         private authService: AuthService,
+        private configService: ConfigService,
     ) {}
 
     /**
@@ -35,16 +38,19 @@ class AuthController {
     @UseInterceptors(OAuthUserInterceptor)
     public async googleAuthRedirect(@Req() req: OAuthRequest, @Res() res: Response): Promise<void> {
         const token = await this.authService.validateOAuthLogin(req.user);
-        res.redirect(`http://localhost:5173/authenticated?token=${token}`);
+        const frontendUrl = this.configService.get('frontend.url');
+        res.redirect(`${frontendUrl}/authenticated?token=${token}`);
     }
 
     /**
      * Logs in a user with the provided email and password.
+     * Rate limited to prevent brute force attacks.
      *
      * @param user The user's login credentials.
      * @returns A Promise that resolves to a JWT payload.
      */
     @Post('login')
+    @UseGuards(RateLimitGuard)
     public async login(@Body() user: LoginDto): Promise<JwtPayload> {
         const validatedUser = await this.userService.validateUserCredentials(user.email, user.password);
         return this.authService.createTokenForUser(validatedUser);

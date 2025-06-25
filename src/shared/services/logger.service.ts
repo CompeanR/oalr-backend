@@ -74,10 +74,10 @@ class AppLoggerService implements LoggerService {
      * @param responseTime Response time in milliseconds.
      * @param userAgent Optional user agent string.
      */
-    public logRequest(method: string, url: string, statusCode: number, responseTime: number, userAgent?: string): void {
+    public logRequest(method: string, url: string, statusCode: number, responseTime: number, _userAgent?: string): void {
         const message = `${method} ${url} ${statusCode} - ${responseTime}ms`;
         const context = 'HTTP';
-        
+
         if (statusCode >= 400) {
             this.error(message, undefined, context);
         } else {
@@ -113,7 +113,7 @@ class AppLoggerService implements LoggerService {
     public logUserAction(userId: string, action: string, metadata?: Record<string, any>): void {
         const message = `User ${userId} performed action: ${action}`;
         const context = 'UserAction';
-        
+
         if (metadata) {
             this.log(`${message} | ${JSON.stringify(metadata)}`, context);
         } else {
