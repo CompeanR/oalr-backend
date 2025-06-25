@@ -82,10 +82,7 @@ class UserController {
      * @returns A Promise that resolves to the updated user without the password.
      */
     @Put(':id')
-    public async updateUser(
-        @Param('id') id: string,
-        @Body() user: UpdateUserDto,
-    ): Promise<UserWithoutPasswordDto> {
+    public async updateUser(@Param('id') id: string, @Body() user: UpdateUserDto): Promise<UserWithoutPasswordDto> {
         const userId = Number(id);
         const updatedUser = await this.userService.updateUser(userId, user);
         return new UserWithoutPasswordDto(updatedUser);

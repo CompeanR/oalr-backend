@@ -4,27 +4,27 @@ import { map } from 'rxjs/operators';
 import { Response } from 'express';
 
 export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  timestamp: string;
+    success: boolean;
+    data: T;
+    timestamp: string;
 }
 
 @Injectable()
 export class ResponseTransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
-    const response = context.switchToHttp().getResponse<Response>();
+    intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
+        const response = context.switchToHttp().getResponse<Response>();
 
-    // Skip transformation for redirects and file responses
-    if (response.statusCode >= 300 && response.statusCode < 400) {
-      return next.handle();
+        // Skip transformation for redirects and file responses
+        if (response.statusCode >= 300 && response.statusCode < 400) {
+            return next.handle();
+        }
+
+        return next.handle().pipe(
+            map((data) => ({
+                success: true,
+                data,
+                timestamp: new Date().toISOString(),
+            })),
+        );
     }
-
-    return next.handle().pipe(
-      map((data) => ({
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      })),
-    );
-  }
 }
