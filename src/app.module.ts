@@ -6,6 +6,7 @@ import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { typeOrmConfig } from './core/database/ormconfig';
 import { AuthModule } from './auth/auth.module';
+import { HealthModule } from './health/health.module';
 import configuration from './config/configuration';
 import { validateEnvironment } from './config/validation';
 import { AppLoggerService } from 'src/shared/services/logger.service';
@@ -21,6 +22,7 @@ import { SecurityMiddleware } from 'src/shared/middleware/security.middleware';
         }),
         TypeOrmModule.forRoot(typeOrmConfig),
         AuthModule,
+        HealthModule,
     ],
     controllers: [],
     providers: [
