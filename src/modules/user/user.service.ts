@@ -135,12 +135,16 @@ class UserService {
     public async validateUserCredentials(email: string, password: string): Promise<User> {
         const user = await this.getUserByEmail(email);
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        if (!user.isActive) {
+            throw new UnauthorizedException('Account is inactive');
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.hashedPassword || '');
         if (!isPasswordValid) {
-            throw new UnauthorizedException('Invalid Credentials');
+            throw new UnauthorizedException('Invalid credentials');
         }
 
         return user;

@@ -26,11 +26,11 @@ class User {
     @Column({ default: true })
     isActive: boolean;
 
-    @Column({ default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     joinedDate: Date;
 
-    @Column({ nullable: true })
-    bio: string;
+    @Column({ type: 'text', nullable: true })
+    bio: string | null;
 }
 
 export { User };
