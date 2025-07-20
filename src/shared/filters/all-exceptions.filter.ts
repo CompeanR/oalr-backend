@@ -1,4 +1,4 @@
-import { Catch, ExceptionFilter, HttpException, ArgumentsHost, HttpStatus } from '@nestjs/common';
+import { Catch, ExceptionFilter, HttpException, ArgumentsHost, HttpStatus, BadRequestException } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { DatabaseErrorCodes } from './utils/errorCodes';
 import { IException } from './interfaces/exception.interface';
@@ -29,13 +29,6 @@ class AllExceptionsFilter implements ExceptionFilter {
         });
     }
 
-    /**
-     * Returns an object containing the response and request
-     * objects from the provided ArgumentsHost object.
-     *
-     * @param host - The ArgumentsHost object to extract the response and request objects from.
-     * @returns An object containing the response and request objects.
-     */
     private getContext(host: ArgumentsHost): { response: Response; request: Request } {
         const httpContext = host.switchToHttp();
         const response = httpContext.getResponse();
@@ -44,13 +37,6 @@ class AllExceptionsFilter implements ExceptionFilter {
         return { response, request };
     }
 
-    /**
-     * If the exception is an instance of HttpException, its status code is returned.
-     * Otherwise, HttpStatus.INTERNAL_SERVER_ERROR is returned.
-     *
-     * @param exception The exception to get the status code for.
-     * @returns The HTTP status code for the given exception.
-     */
     private getStatus(exception: IException): number {
         if (exception instanceof HttpException) {
             return exception.getStatus();
@@ -59,12 +45,6 @@ class AllExceptionsFilter implements ExceptionFilter {
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
-    /**
-     * Returns the error message for the given exception.
-     *
-     * @param exception - The exception to get the message for.
-     * @returns The error message as a string or object.
-     */
     private getMessage(exception: IException): string | object {
         if (exception instanceof QueryFailedError) {
             switch (exception.code) {
@@ -74,6 +54,21 @@ class AllExceptionsFilter implements ExceptionFilter {
                         message: this.formatDetailMessage(exception.detail),
                         detail: 'Repeated value',
                     };
+            }
+        }
+
+        if (exception instanceof BadRequestException) {
+            const response = exception.getResponse() as any;
+
+            if (Array.isArray(response.message)) {
+                return {
+                    status: 'validation_error',
+                    message: 'Please check the following fields:',
+                    errors: response.message.map((error: string) => ({
+                        field: this.getFieldFromMessage(error),
+                        message: this.makeUserFriendlyMessage(error),
+                    })),
+                };
             }
         }
 
@@ -88,13 +83,6 @@ class AllExceptionsFilter implements ExceptionFilter {
         return 'Internal server error';
     }
 
-    /**
-     * Logs exception details with context information.
-     *
-     * @param exception The exception that occurred.
-     * @param request The HTTP request object.
-     * @param status The HTTP status code.
-     */
     private logException(exception: IException, request: Request, status: number): void {
         const context = {
             method: request.method,
@@ -118,12 +106,6 @@ class AllExceptionsFilter implements ExceptionFilter {
         }
     }
 
-    /**
-     * Formats the detail message of an exception by extracting the username from the message
-     *
-     * @param detail The detail message of the exception.
-     * @returns A formatted error message with the username if found.
-     */
     private formatDetailMessage(detail: string): string {
         // This regex captures the value inside the parentheses after "userName" and before "="
         const regex = /"userName"\)=\(([^)]+)\)/;
@@ -134,6 +116,53 @@ class AllExceptionsFilter implements ExceptionFilter {
         }
 
         return detail;
+    }
+
+    private getFieldFromMessage(errorMessage: string): string {
+        // Handle whitelist validation errors: "property fieldName should not exist"
+        if (errorMessage.includes('should not exist')) {
+            const match = errorMessage.match(/property (\w+) should not exist/);
+            return match ? match[1] : 'unknown';
+        }
+        
+        // Handle other validation errors: "fieldName should not be empty"
+        return errorMessage.split(' ')[0];
+    }
+
+    private makeUserFriendlyMessage(errorMessage: string): string {
+        const fieldName = this.getFieldFromMessage(errorMessage);
+        const friendlyField = this.getFieldName(fieldName);
+
+        if (errorMessage.includes('should not be empty')) {
+            return `${friendlyField} is required`;
+        }
+
+        if (errorMessage.includes('must be a string')) {
+            return `${friendlyField} must be a string`;
+        }
+
+        if (errorMessage.includes('must be an email')) {
+            return `Please enter a valid email`;
+        }
+
+        if (errorMessage.includes('should not exist')) {
+            return `${friendlyField} is not allowed`;
+        }
+
+        // Default fallback
+        return errorMessage;
+    }
+
+    private getFieldName(fieldName: string): string {
+        const fieldMappings: { [key: string]: string } = {
+            firstName: 'First Name',
+            lastName: 'Last Name',
+            userName: 'User Name',
+            email: 'Email',
+            password: 'Password',
+        };
+
+        return fieldMappings[fieldName] || fieldName;
     }
 }
 

@@ -19,7 +19,6 @@ export class UserFactory {
         const user = new User();
         user.id = overrides.id || 123;
         user.email = overrides.email || 'test@example.com';
-        user.userName = overrides.userName || 'testuser';
         user.firstName = overrides.firstName || 'Test';
         user.lastName = overrides.lastName || 'User';
         user.hashedPassword = overrides.hashedPassword || 'hashedpassword123';
@@ -43,7 +42,6 @@ export class UserFactory {
                 ...overrides,
                 id: 123 + index,
                 email: `test${index}@example.com`,
-                userName: `testuser${index}`,
             }),
         );
     }

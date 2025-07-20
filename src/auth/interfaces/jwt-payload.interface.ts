@@ -3,7 +3,6 @@ export interface JwtPayload {
     user: {
         userId: number;
         email: string;
-        userName: string;
         firstName: string;
         lastName: string;
     };

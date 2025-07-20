@@ -12,9 +12,6 @@ class User {
     lastName: string;
 
     @Column({ unique: true })
-    userName: string;
-
-    @Column({ unique: true })
     email: string;
 
     @Column({ type: 'text', nullable: true })

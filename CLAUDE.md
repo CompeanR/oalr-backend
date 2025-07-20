@@ -49,22 +49,6 @@ import { AppLoggerService } from 'src/shared/services/logger.service';
 -   **Quotes**: Single quotes for strings
 -   **Semicolons**: Always required
 
-### 4. Documentation Standards
-
-```typescript
-/**
- * Detailed method description explaining the purpose.
- *
- * @param param1 Description of parameter.
- * @param param2 Description of parameter.
- * @returns Description of return value.
- * @throws ExceptionType when specific condition occurs.
- */
-public async methodName(param1: string, param2: number): Promise<ReturnType> {
-    // implementation
-}
-```
-
 ### 5. Method Visibility
 
 -   Always explicitly declare `public`, `private`, or `protected`
@@ -417,6 +401,7 @@ src/
 ### **Building Blocks Implementation Status**
 
 #### ✅ **Already Implemented (5/16)**
+
 1. **Load Balancers** - Health check endpoints at `src/health/`
 2. **Databases** - TypeORM PostgreSQL configuration at `src/core/database/`
 3. **Service Monitoring** - Health service with checks at `src/health/health.service.ts`
@@ -424,19 +409,23 @@ src/
 5. **Distributed Logging** - Centralized logging service at `src/shared/services/logger.service.ts`
 
 #### 🔧 **Phase 1: Storage Foundation (Weeks 1-2)**
+
 6. **Key-Value Store** - `src/shared/storage/kv.service.ts` (Redis integration)
 7. **Distributed Caching** - `src/shared/cache/cache.service.ts` (Multi-layer caching)
 8. **Sequencer** - `src/shared/sequencer/sequencer.service.ts` (UUID, Snowflake algorithms)
 
 #### 📡 **Phase 2: Communication Systems (Weeks 3-4)**
+
 9. **Publish-Subscribe System** - `src/shared/messaging/pubsub.service.ts` (Redis pub/sub)
 10. **Distributed Messaging Queue** - `src/shared/messaging/queue.service.ts` (Bull Queue)
 
 #### 🗄️ **Phase 3: File & Search (Weeks 5-6)**
+
 11. **Blob Store** - `src/shared/storage/blob.service.ts` (S3/MinIO integration)
 12. **Distributed Search** - `src/shared/search/search.service.ts` (Elasticsearch)
 
 #### 🔍 **Phase 4: Advanced Features (Weeks 7-8)**
+
 13. **Content Delivery Network** - `src/modules/content/cdn.service.ts` (CDN configuration)
 14. **Distributed Task Scheduling** - `src/shared/scheduler/scheduler.service.ts` (Cron jobs)
 15. **Sharded Counters** - `src/shared/counter/counter.service.ts` (Performance counters)
@@ -490,20 +479,21 @@ npm run counter:metrics       # View performance metrics
 ### **Learning Objectives**
 
 Each building block implementation focuses on:
-- **Understanding**: Core concepts, trade-offs, and design patterns
-- **Implementation**: Production-ready code following NestJS conventions
-- **Testing**: Comprehensive unit and integration tests
-- **Monitoring**: Health checks and performance metrics integration
-- **Documentation**: Clear JSDoc comments and usage examples
-- **Scalability**: Designed to handle production workloads
+
+-   **Understanding**: Core concepts, trade-offs, and design patterns
+-   **Implementation**: Production-ready code following NestJS conventions
+-   **Testing**: Comprehensive unit and integration tests
+-   **Monitoring**: Health checks and performance metrics integration
+-   **Documentation**: Clear JSDoc comments and usage examples
+-   **Scalability**: Designed to handle production workloads
 
 ### **Dependencies Strategy**
 
 Following the minimal dependencies philosophy, leveraging:
-- **Redis**: Key-Value Store, Caching, Pub/Sub, Messaging Queue
-- **Elasticsearch**: Distributed Search capabilities
-- **AWS SDK**: Blob Store and CDN integration
-- **Bull**: Advanced queue processing with Redis
-- **Node-cron**: Distributed task scheduling
-- **Existing NestJS ecosystem**: Leveraging current dependencies where possible
 
+-   **Redis**: Key-Value Store, Caching, Pub/Sub, Messaging Queue
+-   **Elasticsearch**: Distributed Search capabilities
+-   **AWS SDK**: Blob Store and CDN integration
+-   **Bull**: Advanced queue processing with Redis
+-   **Node-cron**: Distributed task scheduling
+-   **Existing NestJS ecosystem**: Leveraging current dependencies where possible

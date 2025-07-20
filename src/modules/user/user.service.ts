@@ -81,7 +81,6 @@ class UserService {
     public async createOAuthUser(userInput: OAuthUserDto): Promise<User> {
         const user = this.userRepository.create({
             ...userInput,
-            userName: this.generateUserName(userInput.lastName),
             hashedPassword: null,
             isOauth: true,
         });
@@ -150,16 +149,6 @@ class UserService {
         return user;
     }
 
-    /**
-     * Generates a username based on the provided last name.
-     *
-     * @param lastName - The last name used to generate the username.
-     * @returns The generated username.
-     */
-    public generateUserName(lastName: string): string {
-        const userName = lastName.toLowerCase().replace(/\s/g, '');
-        return userName + Math.floor(Math.random() * 1000);
-    }
 }
 
 export { UserService };
