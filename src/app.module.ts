@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { UserModule } from './modules/user/user.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
@@ -15,6 +16,7 @@ import { SecurityMiddleware } from 'src/shared/middleware/security.middleware';
 @Module({
     imports: [
         UserModule,
+        DashboardModule,
         ConfigModule.forRoot({
             isGlobal: true,
             load: [configuration],
