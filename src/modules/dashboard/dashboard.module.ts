@@ -8,11 +8,7 @@ import { AppLoggerService } from '../../shared/services/logger.service';
 import { AuthModule } from '../../auth/auth.module';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([User]),
-        PassportModule,
-        AuthModule,
-    ],
+    imports: [TypeOrmModule.forFeature([User]), PassportModule, AuthModule],
     controllers: [DashboardController],
     providers: [DashboardService, AppLoggerService],
     exports: [DashboardService],

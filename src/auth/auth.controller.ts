@@ -18,21 +18,10 @@ class AuthController {
         private configService: ConfigService,
     ) {}
 
-    /**
-     * It serves only as a redirect to the Google OAuth login page.
-     */
     @Get('google')
     @UseGuards(AuthGuard('google'))
     public async googleAuth(): Promise<void> {}
 
-    /**
-     * Handles the Google authentication redirect.
-     *
-     * @param req - The request object.
-     * @param res - The response object.
-
-     * @returns A Promise that resolves to void.
-     */
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
     @UseInterceptors(OAuthUserInterceptor)
@@ -42,13 +31,6 @@ class AuthController {
         res.redirect(`${frontendUrl}/authenticated?token=${token}`);
     }
 
-    /**
-     * Logs in a user with the provided email and password.
-     * Rate limited to prevent brute force attacks.
-     *
-     * @param user The user's login credentials.
-     * @returns A Promise that resolves to a JWT payload.
-     */
     @Post('login')
     @UseGuards(RateLimitGuard)
     public async login(@Body() user: LoginDto): Promise<JwtPayload> {
@@ -56,12 +38,6 @@ class AuthController {
         return this.authService.createTokenForUser(validatedUser);
     }
 
-    /**
-     * Validates the current JWT token and returns the user information.
-     *
-     * @param req The request object containing the validated user.
-     * @returns A Promise that resolves to the User object.
-     */
     @Get('validate')
     @UseGuards(AuthGuard('jwt'))
     public async validateToken(@Req() req: any): Promise<User> {

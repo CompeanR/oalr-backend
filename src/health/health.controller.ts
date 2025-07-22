@@ -19,11 +19,6 @@ class HealthController {
         };
     }
 
-    /**
-     * Detailed health check including database connectivity and system info.
-     *
-     * @returns Detailed health information.
-     */
     @Get('detailed')
     public async getDetailedHealth(): Promise<object> {
         return this.healthService.getDetailedHealth();

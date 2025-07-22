@@ -70,8 +70,8 @@ class UserController {
     @Put('password')
     @UseGuards(AuthGuard('jwt'))
     public async updatePassword(
-        @Req() req: any, 
-        @Body() passwordData: { currentPassword: string; newPassword: string }
+        @Req() req: any,
+        @Body() passwordData: { currentPassword: string; newPassword: string },
     ): Promise<{ message: string }> {
         await this.userService.updatePassword(req.user.userId, passwordData.currentPassword, passwordData.newPassword);
         return { message: 'Password updated successfully' };

@@ -10,55 +10,24 @@ class AppLoggerService implements LoggerService {
         this.isProduction = this.configService.get('nodeEnv') === 'production';
     }
 
-    /**
-     * Logs a general message.
-     *
-     * @param message The message to log.
-     * @param context Optional context for the log.
-     */
     public log(message: any, context?: string): void {
         this.logger.log(message, context);
     }
 
-    /**
-     * Logs an error message with optional stack trace.
-     *
-     * @param message The error message to log.
-     * @param trace Optional stack trace.
-     * @param context Optional context for the log.
-     */
     public error(message: any, trace?: string, context?: string): void {
         this.logger.error(message, trace, context);
     }
 
-    /**
-     * Logs a warning message.
-     *
-     * @param message The warning message to log.
-     * @param context Optional context for the log.
-     */
     public warn(message: any, context?: string): void {
         this.logger.warn(message, context);
     }
 
-    /**
-     * Logs a debug message (only in development).
-     *
-     * @param message The debug message to log.
-     * @param context Optional context for the log.
-     */
     public debug(message: any, context?: string): void {
         if (!this.isProduction) {
             this.logger.debug(message, context);
         }
     }
 
-    /**
-     * Logs a verbose message (only in development).
-     *
-     * @param message The verbose message to log.
-     * @param context Optional context for the log.
-     */
     public verbose(message: any, context?: string): void {
         if (!this.isProduction) {
             this.logger.verbose(message, context);

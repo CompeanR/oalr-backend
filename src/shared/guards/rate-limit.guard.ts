@@ -22,12 +22,6 @@ class RateLimitGuard implements CanActivate {
         setInterval(() => this.cleanup(), 5 * 60 * 1000);
     }
 
-    /**
-     * Determines if the request should be allowed based on rate limiting.
-     *
-     * @param context The execution context containing request information.
-     * @returns True if request is allowed, throws exception if rate limited.
-     */
     public canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest<Request>();
         const key = this.generateKey(request);
@@ -59,12 +53,6 @@ class RateLimitGuard implements CanActivate {
         return true;
     }
 
-    /**
-     * Generates a unique key for rate limiting based on IP and user.
-     *
-     * @param request The HTTP request object.
-     * @returns A unique key for this request source.
-     */
     private generateKey(request: Request): string {
         // Use IP as primary identifier
         const ip = request.ip || request.connection.remoteAddress || 'unknown';
@@ -75,9 +63,6 @@ class RateLimitGuard implements CanActivate {
         return userId ? `${ip}:${userId}` : ip;
     }
 
-    /**
-     * Removes expired rate limit records to prevent memory leaks.
-     */
     private cleanup(): void {
         const now = Date.now();
         for (const [key, record] of this.storage.entries()) {

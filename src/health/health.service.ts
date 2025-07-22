@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 
@@ -13,11 +13,6 @@ class HealthService {
         this.startTime = new Date();
     }
 
-    /**
-     * Performs detailed health checks including database connectivity.
-     *
-     * @returns Detailed health information with system metrics.
-     */
     public async getDetailedHealth(): Promise<object> {
         const checks = await this.performHealthChecks();
         const systemInfo = this.getSystemInfo();
@@ -33,11 +28,6 @@ class HealthService {
         };
     }
 
-    /**
-     * Checks if the service is ready to accept traffic.
-     *
-     * @returns Readiness status with individual checks.
-     */
     public async getReadiness(): Promise<{ status: string; checks: object }> {
         const checks = await this.performHealthChecks();
         const isReady = Object.values(checks).every((check: any) => check.status === 'ok');
@@ -48,11 +38,6 @@ class HealthService {
         };
     }
 
-    /**
-     * Performs individual health checks for different services.
-     *
-     * @returns Object containing results of all health checks.
-     */
     private async performHealthChecks(): Promise<object> {
         const checks = {
             database: await this.checkDatabase(),
@@ -63,11 +48,6 @@ class HealthService {
         return checks;
     }
 
-    /**
-     * Checks database connectivity by executing a simple query.
-     *
-     * @returns Database health status.
-     */
     private async checkDatabase(): Promise<{ status: string; responseTime?: number; error?: string }> {
         const startTime = Date.now();
 
@@ -87,11 +67,6 @@ class HealthService {
         }
     }
 
-    /**
-     * Checks memory usage and availability.
-     *
-     * @returns Memory health status.
-     */
     private checkMemory(): { status: string; usage: object } {
         const memoryUsage = process.memoryUsage();
         const totalMemory = memoryUsage.heapTotal;
@@ -108,11 +83,6 @@ class HealthService {
         };
     }
 
-    /**
-     * Checks disk usage (simplified version).
-     *
-     * @returns Disk health status.
-     */
     private checkDisk(): { status: string; message: string } {
         // Simplified disk check - in production, you might use a library to check actual disk usage
         return {
@@ -121,11 +91,6 @@ class HealthService {
         };
     }
 
-    /**
-     * Gathers system information.
-     *
-     * @returns System information object.
-     */
     private getSystemInfo(): object {
         return {
             platform: process.platform,
@@ -136,12 +101,6 @@ class HealthService {
         };
     }
 
-    /**
-     * Determines overall health status based on individual checks.
-     *
-     * @param checks Object containing individual health check results.
-     * @returns Overall status string.
-     */
     private determineOverallStatus(checks: object): string {
         const checkValues = Object.values(checks);
 

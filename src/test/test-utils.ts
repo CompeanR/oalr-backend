@@ -53,8 +53,8 @@ export class UserFactory {
 export const mockConfigService = {
     get: jest.fn((key: string) => {
         const config: Record<string, any> = {
-            'nodeEnv': 'test',
-            'port': 3000,
+            nodeEnv: 'test',
+            port: 3000,
             'jwt.secret': 'test-secret-key-for-testing-purposes-only',
             'jwt.expirationTime': '1h',
             'frontend.url': 'http://localhost:3000',
@@ -158,7 +158,7 @@ export class DatabaseTestHelper {
      */
     public static async clearDatabase(dataSource: DataSource): Promise<void> {
         const entities = dataSource.entityMetadatas;
-        
+
         for (const entity of entities) {
             const repository = dataSource.getRepository(entity.name);
             await repository.clear();
@@ -195,7 +195,7 @@ export class AuthTestHelper {
             exp: Math.floor(Date.now() / 1000) + 3600,
             ...payload,
         };
-        
+
         return Buffer.from(JSON.stringify(defaultPayload)).toString('base64');
     }
 
@@ -212,4 +212,3 @@ export class AuthTestHelper {
         };
     }
 }
-

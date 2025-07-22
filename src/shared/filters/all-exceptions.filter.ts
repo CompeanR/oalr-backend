@@ -5,9 +5,6 @@ import { IException } from './interfaces/exception.interface';
 import { Request, Response } from 'express';
 import { AppLoggerService } from 'src/shared/services/logger.service';
 
-/**
- * Catches any unhandled exceptions and sends an appropriate response to the client.
- */
 @Catch()
 class AllExceptionsFilter implements ExceptionFilter {
     constructor(private readonly logger: AppLoggerService) {}
@@ -124,7 +121,7 @@ class AllExceptionsFilter implements ExceptionFilter {
             const match = errorMessage.match(/property (\w+) should not exist/);
             return match ? match[1] : 'unknown';
         }
-        
+
         // Handle other validation errors: "fieldName should not be empty"
         return errorMessage.split(' ')[0];
     }

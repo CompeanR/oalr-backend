@@ -40,14 +40,14 @@ describe('AuthService Integration Tests', () => {
                 // Test database connection
                 TypeOrmModule.forRoot(testDbConfig),
                 TypeOrmModule.forFeature([User]),
-                
+
                 // Configuration
                 ConfigModule.forRoot({
                     load: [configuration],
                     validate: validateEnvironment,
                     isGlobal: true,
                 }),
-                
+
                 // JWT Module with test config
                 JwtModule.registerAsync({
                     imports: [ConfigModule],
@@ -57,10 +57,7 @@ describe('AuthService Integration Tests', () => {
                     }),
                 }),
             ],
-            providers: [
-                AuthService,
-                UserService,
-            ],
+            providers: [AuthService, UserService],
         }).compile();
 
         authService = module.get<AuthService>(AuthService);
@@ -87,7 +84,7 @@ describe('AuthService Integration Tests', () => {
             // Arrange - Create a real user in the test database
             const email = 'test@integration.com';
             const password = 'Password123!';
-            
+
             const userData: CreateUserDto = {
                 email,
                 userName: 'integrationtest',
@@ -95,7 +92,7 @@ describe('AuthService Integration Tests', () => {
                 lastName: 'Test',
                 password, // UserService.createUser handles hashing
             };
-            
+
             const savedUser = await userService.createUser(userData);
 
             // Act - Test the validateUser method
@@ -111,13 +108,13 @@ describe('AuthService Integration Tests', () => {
 
         it('should throw UnauthorizedException for non-existent user', async () => {
             // Act & Assert
-            await expect(
-                authService.validateUser('nonexistent@test.com', 'anypassword')
-            ).rejects.toThrow(UnauthorizedException);
-            
-            await expect(
-                authService.validateUser('nonexistent@test.com', 'anypassword')
-            ).rejects.toThrow('Invalid credentials');
+            await expect(authService.validateUser('nonexistent@test.com', 'anypassword')).rejects.toThrow(
+                UnauthorizedException,
+            );
+
+            await expect(authService.validateUser('nonexistent@test.com', 'anypassword')).rejects.toThrow(
+                'Invalid credentials',
+            );
         });
 
         it('should throw UnauthorizedException for wrong password', async () => {
@@ -125,7 +122,7 @@ describe('AuthService Integration Tests', () => {
             const email = 'wrongpass@test.com';
             const correctPassword = 'CorrectPass123!';
             const wrongPassword = 'WrongPass123!';
-            
+
             const userData: CreateUserDto = {
                 email,
                 userName: 'wrongpasstest',
@@ -133,20 +130,18 @@ describe('AuthService Integration Tests', () => {
                 lastName: 'Pass',
                 password: correctPassword,
             };
-            
+
             await userService.createUser(userData);
 
             // Act & Assert
-            await expect(
-                authService.validateUser(email, wrongPassword)
-            ).rejects.toThrow(UnauthorizedException);
+            await expect(authService.validateUser(email, wrongPassword)).rejects.toThrow(UnauthorizedException);
         });
 
         it('should throw UnauthorizedException for inactive user', async () => {
             // Arrange - Create user first, then manually deactivate in database
             const email = 'inactive@test.com';
             const password = 'Password123!';
-            
+
             const userData: CreateUserDto = {
                 email,
                 userName: 'inactivetest',
@@ -154,17 +149,15 @@ describe('AuthService Integration Tests', () => {
                 lastName: 'User',
                 password,
             };
-            
+
             const user = await userService.createUser(userData);
-            
+
             // Manually deactivate user in database (since UserService doesn't support isActive in CreateUserDto)
             const userRepository = dataSource.getRepository(User);
             await userRepository.update(user.id, { isActive: false });
 
             // Act & Assert
-            await expect(
-                authService.validateUser(email, password)
-            ).rejects.toThrow(UnauthorizedException);
+            await expect(authService.validateUser(email, password)).rejects.toThrow(UnauthorizedException);
         });
     });
 
@@ -179,7 +172,7 @@ describe('AuthService Integration Tests', () => {
                 lastName: 'User',
                 picture: 'https://example.com/picture.jpg',
             };
-            
+
             // Create user first time (simulating previous OAuth registration)
             const existingUser = await userService.createOAuthUser(oauthProfile);
 
@@ -190,10 +183,10 @@ describe('AuthService Integration Tests', () => {
             expect(result).toBeDefined();
             expect(typeof result).toBe('string');
             expect(result.length).toBeGreaterThan(0);
-            
+
             // Verify the user wasn't duplicated
             const users = await userService.getAllUsers();
-            const userWithEmail = users.filter(u => u.email === email);
+            const userWithEmail = users.filter((u) => u.email === email);
             expect(userWithEmail).toHaveLength(1);
         });
 
@@ -213,7 +206,7 @@ describe('AuthService Integration Tests', () => {
             // Assert
             expect(result).toBeDefined();
             expect(typeof result).toBe('string');
-            
+
             // Verify new user was created
             const createdUser = await userService.getUserByEmail(oauthProfile.email);
             expect(createdUser).toBeDefined();
@@ -236,7 +229,7 @@ describe('AuthService Integration Tests', () => {
                 lastName: 'Test',
                 password: 'TestPassword123!',
             };
-            
+
             const user = await userService.createUser(userData);
 
             // Act
@@ -247,7 +240,7 @@ describe('AuthService Integration Tests', () => {
             expect(result.accessToken).toBeDefined();
             expect(typeof result.accessToken).toBe('string');
             expect(result.accessToken.length).toBeGreaterThan(0);
-            
+
             expect(result.user).toBeDefined();
             expect(result.user.userId).toBe(user.id);
             expect(result.user.email).toBe(user.email);
@@ -268,16 +261,13 @@ describe('AuthService Integration Tests', () => {
                 lastName: 'Flow',
                 password,
             };
-            
+
             const registeredUser = await userService.createUser(userData);
             expect(registeredUser).toBeDefined();
             expect(registeredUser.id).toBeDefined();
 
             // Step 2: Validate credentials
-            const validatedUser = await authService.validateUser(
-                userData.email, 
-                password
-            );
+            const validatedUser = await authService.validateUser(userData.email, password);
             expect(validatedUser).toBeDefined();
             expect(validatedUser.id).toBe(registeredUser.id);
 

@@ -13,15 +13,6 @@ class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    /**
-     * Validates a user's credentials by checking if the email and password match an existing user.
-     *
-     * @param email The email of the user to validate.
-     * @param password The password of the user to validate.
-     *
-     * @returns A Promise that resolves to the validated User object.
-     * @throws UnauthorizedException if the credentials are invalid.
-     */
     public async validateUser(email: string, password: string): Promise<User> {
         const validatedUser = await this.userService.validateUserCredentials(email, password);
         if (!validatedUser) {
@@ -54,12 +45,6 @@ class AuthService {
         return accessToken;
     }
 
-    /**
-     * Authenticates a user and returns a JWT payload.
-     *
-     * @param user The user to authenticate.
-     * @returns A Promise that resolves to a JwtPayload.
-     */
     public createTokenForUser(user: User): JwtPayload {
         const payload = { username: user.email, sub: user.id };
         const accessToken = this.jwtService.sign(payload);

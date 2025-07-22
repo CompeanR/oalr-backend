@@ -85,10 +85,7 @@ describe('AuthController', () => {
 
             // Assert
             expect(result).toEqual(mockJwtPayload);
-            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(
-                loginDto.email,
-                loginDto.password
-            );
+            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(loginDto.email, loginDto.password);
             expect(mockAuthService.createTokenForUser).toHaveBeenCalledWith(mockUser);
             expect(mockUserService.validateUserCredentials).toHaveBeenCalledTimes(1);
             expect(mockAuthService.createTokenForUser).toHaveBeenCalledTimes(1);
@@ -101,17 +98,12 @@ describe('AuthController', () => {
                 password: 'wrongpassword',
             };
 
-            mockUserService.validateUserCredentials.mockRejectedValue(
-                new UnauthorizedException('Invalid credentials')
-            );
+            mockUserService.validateUserCredentials.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
 
             // Act & Assert
             await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
             await expect(controller.login(loginDto)).rejects.toThrow('Invalid credentials');
-            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(
-                loginDto.email,
-                loginDto.password
-            );
+            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(loginDto.email, loginDto.password);
             expect(mockAuthService.createTokenForUser).not.toHaveBeenCalled();
         });
 
@@ -122,16 +114,11 @@ describe('AuthController', () => {
                 password: 'password123',
             };
 
-            mockUserService.validateUserCredentials.mockRejectedValue(
-                new UnauthorizedException('Invalid credentials')
-            );
+            mockUserService.validateUserCredentials.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
 
             // Act & Assert
             await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
-            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(
-                loginDto.email,
-                loginDto.password
-            );
+            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(loginDto.email, loginDto.password);
         });
 
         it('should handle service errors gracefully', async () => {
@@ -141,16 +128,11 @@ describe('AuthController', () => {
                 password: 'password123',
             };
 
-            mockUserService.validateUserCredentials.mockRejectedValue(
-                new Error('Database connection error')
-            );
+            mockUserService.validateUserCredentials.mockRejectedValue(new Error('Database connection error'));
 
             // Act & Assert
             await expect(controller.login(loginDto)).rejects.toThrow('Database connection error');
-            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(
-                loginDto.email,
-                loginDto.password
-            );
+            expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(loginDto.email, loginDto.password);
         });
     });
 
@@ -185,9 +167,7 @@ describe('AuthController', () => {
                 },
             };
 
-            mockUserService.getUserById.mockRejectedValue(
-                new NotFoundException('User not found')
-            );
+            mockUserService.getUserById.mockRejectedValue(new NotFoundException('User not found'));
 
             // Act & Assert
             await expect(controller.validateToken(mockRequest)).rejects.toThrow(NotFoundException);
@@ -204,9 +184,7 @@ describe('AuthController', () => {
                 },
             };
 
-            mockUserService.getUserById.mockRejectedValue(
-                new NotFoundException('User not found')
-            );
+            mockUserService.getUserById.mockRejectedValue(new NotFoundException('User not found'));
 
             // Act & Assert
             await expect(controller.validateToken(mockRequest)).rejects.toThrow(NotFoundException);
@@ -251,9 +229,7 @@ describe('AuthController', () => {
             // Assert
             expect(mockAuthService.validateOAuthLogin).toHaveBeenCalledWith(mockOAuthUser);
             expect(mockConfigService.get).toHaveBeenCalledWith('frontend.url');
-            expect(mockResponse.redirect).toHaveBeenCalledWith(
-                `${frontendUrl}/authenticated?token=${mockToken}`
-            );
+            expect(mockResponse.redirect).toHaveBeenCalledWith(`${frontendUrl}/authenticated?token=${mockToken}`);
         });
 
         it('should handle OAuth validation errors', async () => {
@@ -272,14 +248,12 @@ describe('AuthController', () => {
                 redirect: jest.fn(),
             } as unknown as Response;
 
-            mockAuthService.validateOAuthLogin.mockRejectedValue(
-                new Error('OAuth validation failed')
-            );
+            mockAuthService.validateOAuthLogin.mockRejectedValue(new Error('OAuth validation failed'));
 
             // Act & Assert
-            await expect(
-                controller.googleAuthRedirect(mockRequest, mockResponse)
-            ).rejects.toThrow('OAuth validation failed');
+            await expect(controller.googleAuthRedirect(mockRequest, mockResponse)).rejects.toThrow(
+                'OAuth validation failed',
+            );
             expect(mockAuthService.validateOAuthLogin).toHaveBeenCalledWith(mockOAuthUser);
             expect(mockResponse.redirect).not.toHaveBeenCalled();
         });
@@ -294,9 +268,7 @@ describe('AuthController', () => {
             } as unknown as Response;
 
             // Act & Assert
-            await expect(
-                controller.googleAuthRedirect(mockRequest, mockResponse)
-            ).rejects.toThrow();
+            await expect(controller.googleAuthRedirect(mockRequest, mockResponse)).rejects.toThrow();
             expect(mockAuthService.validateOAuthLogin).toHaveBeenCalledWith(undefined);
         });
     });
