@@ -60,6 +60,23 @@ class UserController {
         return new UserWithoutPasswordDto(validatedUser);
     }
 
+    @Put('profile')
+    @UseGuards(AuthGuard('jwt'))
+    public async updateProfile(@Req() req: any, @Body() user: UpdateUserDto): Promise<UserWithoutPasswordDto> {
+        const updatedUser = await this.userService.updateUser(req.user.userId, user);
+        return new UserWithoutPasswordDto(updatedUser);
+    }
+
+    @Put('password')
+    @UseGuards(AuthGuard('jwt'))
+    public async updatePassword(
+        @Req() req: any, 
+        @Body() passwordData: { currentPassword: string; newPassword: string }
+    ): Promise<{ message: string }> {
+        await this.userService.updatePassword(req.user.userId, passwordData.currentPassword, passwordData.newPassword);
+        return { message: 'Password updated successfully' };
+    }
+
     @Put(':id')
     public async updateUser(@Param('id') id: string, @Body() user: UpdateUserDto): Promise<UserWithoutPasswordDto> {
         const userId = Number(id);

@@ -4,12 +4,12 @@ class UpdateUserDto {
     @IsString()
     @IsOptional()
     @Length(2, 50)
-    name?: string;
+    firstName?: string;
 
     @IsString()
     @IsOptional()
     @Length(2, 50)
-    username?: string;
+    lastName?: string;
 
     @IsEmail()
     @IsOptional()

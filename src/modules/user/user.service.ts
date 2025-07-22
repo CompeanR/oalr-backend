@@ -149,6 +149,22 @@ class UserService {
         return user;
     }
 
+    public async updatePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
+        const user = await this.getUserById(userId);
+        
+        if (user.isOauth) {
+            throw new UnauthorizedException('Cannot update password for OAuth users');
+        }
+
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.hashedPassword || '');
+        if (!isCurrentPasswordValid) {
+            throw new UnauthorizedException('Current password is invalid');
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await this.userRepository.update(userId, { hashedPassword: hashedNewPassword });
+    }
+
 }
 
 export { UserService };
