@@ -30,6 +30,7 @@
         "@nestjs/jwt": "^10.2.0",
         "@nestjs/passport": "^10.0.2",
         "@nestjs/platform-express": "^10.0.0",
+        "@nestjs/swagger": "^7.4.2",
         "@nestjs/typeorm": "^10.0.0",
         "bcrypt": "^5.1.1",
         "class-transformer": "^0.5.1",
@@ -41,7 +42,8 @@
         "pg": "^8.11.3",
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.8.1",
-        "sql-template-strings": "^2.2.2"
+        "sql-template-strings": "^2.2.2",
+        "swagger-ui-express": "^5.0.1"
     },
     "devDependencies": {
         "@nestjs/cli": "^10.0.0",
@@ -55,6 +57,7 @@
         "@types/passport-google-oauth20": "^2.0.14",
         "@types/passport-jwt": "^3.0.13",
         "@types/supertest": "^2.0.12",
+        "@types/swagger-ui-express": "^4.1.8",
         "@typescript-eslint/eslint-plugin": "^6.0.0",
         "@typescript-eslint/parser": "^6.0.0",
         "eslint": "^8.42.0",

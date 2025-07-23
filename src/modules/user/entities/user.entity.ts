@@ -17,13 +17,13 @@ class User {
     @Column({ type: 'text', nullable: true })
     hashedPassword: string | null;
 
-    @Column({ default: false })
+    @Column({ default: false, nullable: true })
     isOauth: boolean;
 
-    @Column({ default: true })
+    @Column({ default: true, nullable: true })
     isActive: boolean;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', nullable: true })
     joinedDate: Date;
 
     @Column({ type: 'text', nullable: true })

@@ -1,7 +1,7 @@
 export interface JwtPayload {
     accessToken: string;
     user: {
-        userId: number;
+        id: number;
         email: string;
         firstName: string;
         lastName: string;

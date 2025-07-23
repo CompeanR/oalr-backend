@@ -16,13 +16,13 @@ class UserWithoutPasswordDto {
     email: string;
 
     @Expose()
-    isOauth: boolean;
+    isOauth?: boolean;
 
     @Expose()
-    isActive: boolean;
+    isActive?: boolean;
 
     @Expose()
-    joinedDate: Date;
+    joinedDate?: Date;
 
     constructor(userEntity: Partial<User>) {
         Object.assign(this, userEntity);

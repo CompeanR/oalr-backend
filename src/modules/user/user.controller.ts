@@ -12,11 +12,14 @@ import {
     Req,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto, UserWithoutPasswordDto } from './dto';
 import { AuthService } from 'src/auth/auth.service';
+import { JwtPayloadDto } from 'src/auth/dto/jwt-payload.dto';
 import { JwtPayload } from 'src/auth/interfaces';
 
+@ApiTags('users')
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('user')
 class UserController {
@@ -26,6 +29,12 @@ class UserController {
     ) {}
 
     @Get()
+    @ApiOperation({ summary: 'Get all users' })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'List of all users', 
+        type: [UserWithoutPasswordDto] 
+    })
     public async getAllUsers(): Promise<UserWithoutPasswordDto[]> {
         const users = await this.userService.getAllUsers();
         return users.map((user) => new UserWithoutPasswordDto(user));
@@ -33,6 +42,14 @@ class UserController {
 
     @Get('profile')
     @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'Get current user profile' })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Current user profile', 
+        type: UserWithoutPasswordDto 
+    })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
     public async getCurrentUser(@Req() req: any): Promise<UserWithoutPasswordDto> {
         const user = await this.userService.getUserById(req.user.userId);
         return new UserWithoutPasswordDto(user);
@@ -46,6 +63,14 @@ class UserController {
     }
 
     @Post()
+    @ApiOperation({ summary: 'Create a new user (register)' })
+    @ApiBody({ type: CreateUserDto })
+    @ApiResponse({ 
+        status: 201, 
+        description: 'User created successfully', 
+        type: JwtPayloadDto 
+    })
+    @ApiResponse({ status: 400, description: 'Bad request' })
     public async createUser(@Body() user: CreateUserDto): Promise<JwtPayload> {
         const createdUser = await this.userService.createUser(user);
         const token = this.authService.createTokenForUser(createdUser);

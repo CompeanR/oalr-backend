@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ResponseTransformInterceptor } from './shared/interceptors/response-transform.interceptor';
 
@@ -35,6 +36,33 @@ async function bootstrap(): Promise<void> {
 
     // Disable X-Powered-By header
     app.getHttpAdapter().getInstance().disable('x-powered-by');
+
+    // Swagger/OpenAPI configuration
+    if (configService.get('nodeEnv') !== 'production') {
+        const config = new DocumentBuilder()
+            .setTitle('OALR API')
+            .setDescription('OALR Platform API Documentation')
+            .setVersion('1.0')
+            .addBearerAuth(
+                {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                    name: 'JWT',
+                    description: 'Enter JWT token',
+                    in: 'header',
+                },
+                'JWT-auth',
+            )
+            .build();
+
+        const document = SwaggerModule.createDocument(app, config);
+        SwaggerModule.setup('api', app, document, {
+            swaggerOptions: {
+                persistAuthorization: true,
+            },
+        });
+    }
 
     const port = configService.get('port') || 3000;
     await app.listen(port);
