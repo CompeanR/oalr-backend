@@ -2,12 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { ResponseTransformInterceptor } from './shared/interceptors/response-transform.interceptor';
 
 async function bootstrap(): Promise<void> {
     const app = await NestFactory.create(AppModule);
     const configService = app.get(ConfigService);
+
+    // Cookie parser middleware
+    app.use(cookieParser());
 
     // Global validation pipe with security options
     app.useGlobalPipes(

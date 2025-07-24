@@ -3,6 +3,7 @@ import { UserModule } from './modules/user/user.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { typeOrmConfig } from './core/database/ormconfig';
@@ -23,6 +24,7 @@ import { SecurityMiddleware } from 'src/shared/middleware/security.middleware';
             validate: validateEnvironment,
         }),
         TypeOrmModule.forRoot(typeOrmConfig),
+        ScheduleModule.forRoot(),
         AuthModule,
         HealthModule,
     ],

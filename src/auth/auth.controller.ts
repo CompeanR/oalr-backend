@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards, UseInterceptors, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { UserService } from 'src/modules/user/user.service';
@@ -8,7 +8,7 @@ import { JwtPayloadDto } from './dto/jwt-payload.dto';
 import { JwtPayload, OAuthRequest } from './interfaces';
 import { AuthGuard } from '@nestjs/passport';
 import { OAuthUserInterceptor } from 'src/shared/interceptors/oauth-user.interceptor';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { User } from 'src/modules/user/entities/user.entity';
 import { RateLimitGuard } from 'src/shared/guards/rate-limit.guard';
 
@@ -45,9 +45,80 @@ class AuthController {
     })
     @ApiResponse({ status: 401, description: 'Invalid credentials' })
     @ApiResponse({ status: 429, description: 'Too many requests' })
-    public async login(@Body() user: LoginDto): Promise<JwtPayload> {
-        const validatedUser = await this.userService.validateUserCredentials(user.email, user.password);
-        return this.authService.createTokenForUser(validatedUser);
+    public async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response): Promise<JwtPayload> {
+        const validatedUser = await this.userService.validateUserCredentials(loginDto.email, loginDto.password);
+        const tokenPayload = this.authService.createTokenForUser(validatedUser);
+        
+        // Create and set refresh token in httpOnly cookie
+        const refreshToken = await this.authService.createRefreshToken(validatedUser.id);
+        const isProduction = this.configService.get('nodeEnv') === 'production';
+        
+        response.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction, // Only secure in production (HTTPS)
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            path: '/',
+        });
+
+        return tokenPayload;
+    }
+
+    @Post('refresh')
+    @ApiOperation({ summary: 'Refresh access token using httpOnly cookie' })
+    @ApiResponse({
+        status: 200,
+        description: 'Token refreshed successfully',
+        type: JwtPayloadDto,
+    })
+    @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+    public async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response): Promise<JwtPayload> {
+        const refreshToken = request.cookies?.refreshToken;
+        
+        if (!refreshToken) {
+            throw new UnauthorizedException('Refresh token not found');
+        }
+
+        // Validate refresh token and get user
+        const user = await this.authService.validateRefreshToken(refreshToken);
+        
+        // Create new tokens
+        const tokenPayload = this.authService.createTokenForUser(user);
+        const newRefreshToken = await this.authService.createRefreshToken(user.id);
+        
+        // Set new refresh token in httpOnly cookie
+        const isProduction = this.configService.get('nodeEnv') === 'production';
+        response.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            path: '/',
+        });
+
+        return tokenPayload;
+    }
+
+    @Post('logout')
+    @ApiOperation({ summary: 'Logout user and revoke refresh token' })
+    @ApiResponse({ status: 200, description: 'Logout successful' })
+    public async logout(@Req() request: Request, @Res({ passthrough: true }) response: Response): Promise<{ message: string }> {
+        const refreshToken = request.cookies?.refreshToken;
+        
+        if (refreshToken) {
+            // Revoke the refresh token
+            await this.authService.revokeRefreshToken(refreshToken);
+        }
+
+        // Clear the httpOnly cookie
+        response.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: this.configService.get('nodeEnv') === 'production',
+            sameSite: 'strict',
+            path: '/',
+        });
+
+        return { message: 'Logout successful' };
     }
 
     @Get('validate')

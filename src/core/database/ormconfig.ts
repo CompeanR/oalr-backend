@@ -8,7 +8,7 @@ const typeOrmConfig: TypeOrmModuleOptions = {
     username: 'oalr',
     password: 'oalr123',
     database: 'oalr',
-    entities: [User], // Direct entity imports - works in all environments
+    autoLoadEntities: true,
     migrations: ['dist/core/database/migrations/**/*.{ts,js}'],
     synchronize: false,
     logging: false,
