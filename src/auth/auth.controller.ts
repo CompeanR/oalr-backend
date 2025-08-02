@@ -29,9 +29,28 @@ class AuthController {
     @UseGuards(AuthGuard('google'))
     @UseInterceptors(OAuthUserInterceptor)
     public async googleAuthRedirect(@Req() req: OAuthRequest, @Res() res: Response): Promise<void> {
-        const token = await this.authService.validateOAuthLogin(req.user);
+        const user = await this.userService.getUserByEmail(req.user.email);
         const frontendUrl = this.configService.get('frontend.url');
-        res.redirect(`${frontendUrl}/authenticated?token=${token}`);
+
+        let refreshToken;
+        if (user) {
+            try {
+                refreshToken = await this.authService.createRefreshToken(user?.id);
+            } catch (error) {
+                res.redirect(`${frontendUrl}/login`);
+            }
+        }
+
+        const isProduction = this.configService.get('nodeEnv') === 'production';
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            path: '/',
+        });
+
+        res.redirect(`${frontendUrl}/dashboard`);
     }
 
     @Post('login')
@@ -48,11 +67,11 @@ class AuthController {
     public async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response): Promise<JwtPayload> {
         const validatedUser = await this.userService.validateUserCredentials(loginDto.email, loginDto.password);
         const tokenPayload = this.authService.createTokenForUser(validatedUser);
-        
+
         // Create and set refresh token in httpOnly cookie
         const refreshToken = await this.authService.createRefreshToken(validatedUser.id);
         const isProduction = this.configService.get('nodeEnv') === 'production';
-        
+
         response.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: isProduction, // Only secure in production (HTTPS)
@@ -74,18 +93,18 @@ class AuthController {
     @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
     public async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response): Promise<JwtPayload> {
         const refreshToken = request.cookies?.refreshToken;
-        
+
         if (!refreshToken) {
             throw new UnauthorizedException('Refresh token not found');
         }
 
         // Validate refresh token and get user
         const user = await this.authService.validateRefreshToken(refreshToken);
-        
+
         // Create new tokens
         const tokenPayload = this.authService.createTokenForUser(user);
         const newRefreshToken = await this.authService.createRefreshToken(user.id);
-        
+
         // Set new refresh token in httpOnly cookie
         const isProduction = this.configService.get('nodeEnv') === 'production';
         response.cookie('refreshToken', newRefreshToken, {
@@ -102,9 +121,12 @@ class AuthController {
     @Post('logout')
     @ApiOperation({ summary: 'Logout user and revoke refresh token' })
     @ApiResponse({ status: 200, description: 'Logout successful' })
-    public async logout(@Req() request: Request, @Res({ passthrough: true }) response: Response): Promise<{ message: string }> {
+    public async logout(
+        @Req() request: Request,
+        @Res({ passthrough: true }) response: Response,
+    ): Promise<{ message: string }> {
         const refreshToken = request.cookies?.refreshToken;
-        
+
         if (refreshToken) {
             // Revoke the refresh token
             await this.authService.revokeRefreshToken(refreshToken);
