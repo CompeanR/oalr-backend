@@ -138,7 +138,6 @@ describe('AuthService', () => {
             const user = UserFactory.create({
                 id: 123,
                 email: 'test@example.com',
-                userName: 'testuser',
                 firstName: 'Test',
                 lastName: 'User',
             });
@@ -151,9 +150,8 @@ describe('AuthService', () => {
             expect(result).toEqual({
                 accessToken: 'mock-jwt-token',
                 user: {
-                    userId: 123,
+                    id: 123,
                     email: 'test@example.com',
-                    userName: 'testuser',
                     firstName: 'Test',
                     lastName: 'User',
                 },
@@ -161,7 +159,7 @@ describe('AuthService', () => {
             expect(mockJwtService.sign).toHaveBeenCalledWith({
                 username: user.email,
                 sub: user.id,
-            });
+            }, { expiresIn: '15m' });
         });
 
         it('should handle user with minimal information', () => {
@@ -169,7 +167,6 @@ describe('AuthService', () => {
             const user = UserFactory.create({
                 id: 456,
                 email: 'minimal@example.com',
-                userName: 'minimaluser',
                 firstName: 'Minimal',
                 lastName: 'User',
             });
@@ -180,7 +177,7 @@ describe('AuthService', () => {
 
             // Assert
             expect(result.accessToken).toBe('another-mock-token');
-            expect(result.user.userId).toBe(456);
+            expect(result.user.id).toBe(456);
             expect(result.user.email).toBe('minimal@example.com');
         });
     });

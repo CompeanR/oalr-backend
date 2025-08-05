@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository, ObjectLiteral } from 'typeorm';
 import { User } from 'src/modules/user/entities/user.entity';
+import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 
 /**
  * Mock factory for creating test users following the established User entity pattern.
@@ -141,6 +142,10 @@ export async function createTestingModule(metadata: any): Promise<TestingModule>
             },
             {
                 provide: getRepositoryToken(User),
+                useValue: createMockRepository(),
+            },
+            {
+                provide: getRepositoryToken(RefreshToken),
                 useValue: createMockRepository(),
             },
         ],

@@ -7,6 +7,7 @@ import { DataSource } from 'typeorm';
 import { AuthService } from '../auth.service';
 import { UserService } from 'src/modules/user/user.service';
 import { User } from 'src/modules/user/entities/user.entity';
+import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { UnauthorizedException } from '@nestjs/common';
 import { TokenCreationException } from 'src/shared/exceptions/common.exception';
 import { OAuthUserDto } from 'src/modules/user/dto/oauth-user-dto';
@@ -28,7 +29,7 @@ describe('AuthService Integration Tests', () => {
         username: 'oalr',
         password: 'oalr123',
         database: 'oalr_test', // Different database for tests
-        entities: [User],
+        entities: [User, RefreshToken],
         synchronize: true, // Auto-sync schema for tests
         dropSchema: true, // Clean database on each test run
         logging: false,
@@ -39,7 +40,7 @@ describe('AuthService Integration Tests', () => {
             imports: [
                 // Test database connection
                 TypeOrmModule.forRoot(testDbConfig),
-                TypeOrmModule.forFeature([User]),
+                TypeOrmModule.forFeature([User, RefreshToken]),
 
                 // Configuration
                 ConfigModule.forRoot({
@@ -74,9 +75,11 @@ describe('AuthService Integration Tests', () => {
     });
 
     beforeEach(async () => {
-        // Clear all users before each test
+        // Delete all records before each test (handles foreign keys better than clear)
+        const refreshTokenRepository = dataSource.getRepository(RefreshToken);
         const userRepository = dataSource.getRepository(User);
-        await userRepository.clear();
+        await refreshTokenRepository.delete({});
+        await userRepository.delete({});
     });
 
     describe('validateUser', () => {
@@ -87,7 +90,6 @@ describe('AuthService Integration Tests', () => {
 
             const userData: CreateUserDto = {
                 email,
-                userName: 'integrationtest',
                 firstName: 'Integration',
                 lastName: 'Test',
                 password, // UserService.createUser handles hashing
@@ -102,7 +104,7 @@ describe('AuthService Integration Tests', () => {
             expect(result).toBeDefined();
             expect(result.id).toBe(savedUser.id);
             expect(result.email).toBe(email);
-            expect(result.userName).toBe('integrationtest');
+            expect(result.firstName).toBe('Integration');
             expect(result.hashedPassword).toBeDefined(); // UserService returns the full user
         });
 
@@ -125,7 +127,6 @@ describe('AuthService Integration Tests', () => {
 
             const userData: CreateUserDto = {
                 email,
-                userName: 'wrongpasstest',
                 firstName: 'Wrong',
                 lastName: 'Pass',
                 password: correctPassword,
@@ -144,7 +145,6 @@ describe('AuthService Integration Tests', () => {
 
             const userData: CreateUserDto = {
                 email,
-                userName: 'inactivetest',
                 firstName: 'Inactive',
                 lastName: 'User',
                 password,
@@ -224,7 +224,6 @@ describe('AuthService Integration Tests', () => {
             // Arrange - Create a real user
             const userData: CreateUserDto = {
                 email: 'token@test.com',
-                userName: 'tokentest',
                 firstName: 'Token',
                 lastName: 'Test',
                 password: 'TestPassword123!',
@@ -242,9 +241,8 @@ describe('AuthService Integration Tests', () => {
             expect(result.accessToken.length).toBeGreaterThan(0);
 
             expect(result.user).toBeDefined();
-            expect(result.user.userId).toBe(user.id);
+            expect(result.user.id).toBe(user.id);
             expect(result.user.email).toBe(user.email);
-            expect(result.user.userName).toBe(user.userName);
             expect(result.user.firstName).toBe(user.firstName);
             expect(result.user.lastName).toBe(user.lastName);
         });
@@ -256,7 +254,6 @@ describe('AuthService Integration Tests', () => {
             const password = 'FullFlowPass123!';
             const userData: CreateUserDto = {
                 email: 'fullflow@test.com',
-                userName: 'fullflowtest',
                 firstName: 'Full',
                 lastName: 'Flow',
                 password,
@@ -274,7 +271,7 @@ describe('AuthService Integration Tests', () => {
             // Step 3: Create token
             const tokenResult = authService.createTokenForUser(validatedUser);
             expect(tokenResult.accessToken).toBeDefined();
-            expect(tokenResult.user.userId).toBe(registeredUser.id);
+            expect(tokenResult.user.id).toBe(registeredUser.id);
 
             // Full flow completed successfully
         });

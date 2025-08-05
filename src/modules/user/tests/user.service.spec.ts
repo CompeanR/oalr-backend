@@ -72,7 +72,6 @@ describe('UserService', () => {
             // Arrange
             const createUserDto = {
                 email: 'test@test.com',
-                userName: 'testxd',
                 password: 'testPassword',
                 firstName: 'xd',
                 lastName: 'xd2',
@@ -112,10 +111,8 @@ describe('UserService', () => {
                 picture: 'https://example.com/profile.jpg',
             };
 
-            const expectedUserName = 'doe123';
             const createdUser = {
                 ...oauthuserDto,
-                userName: expectedUserName,
                 hashedPassword: null,
                 isOauth: true,
             };
@@ -131,7 +128,6 @@ describe('UserService', () => {
             expect(result).toEqual(savedUser);
             expect(mockRepository.create).toHaveBeenCalledWith({
                 ...oauthuserDto,
-                userName: expect.stringMatching(/^doe\d{1,3}$/),
                 hashedPassword: null,
                 isOauth: true,
             });
@@ -150,7 +146,6 @@ describe('UserService', () => {
 
             const createdUser = {
                 ...oauthuserDto,
-                userName: expect.stringMatching(/^doe\d{1,3}$/),
                 hashedPassword: null,
                 isOauth: true,
             };
@@ -168,18 +163,4 @@ describe('UserService', () => {
         });
     });
 
-    describe('generateUserName', () => {
-        it('should generate username from lastName', () => {
-            // Arrange
-            const lastName = 'Smith';
-
-            // Act
-            const result = userService.generateUserName(lastName);
-
-            // Assert
-            expect(result).toMatch(/^smith\d{1,3}$/);
-            expect(typeof result).toBe('string');
-            expect(result.length).toBeGreaterThan(5);
-        });
-    });
 });

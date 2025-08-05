@@ -19,11 +19,13 @@ describe('AuthController', () => {
     const mockAuthService = {
         validateOAuthLogin: jest.fn(),
         createTokenForUser: jest.fn(),
+        createRefreshToken: jest.fn(),
     };
 
     const mockUserService = {
         validateUserCredentials: jest.fn(),
         getUserById: jest.fn(),
+        getUserByEmail: jest.fn(),
     };
 
     beforeEach(async () => {
@@ -69,9 +71,8 @@ describe('AuthController', () => {
             const mockJwtPayload: JwtPayload = {
                 accessToken: 'mock-jwt-token',
                 user: {
-                    userId: mockUser.id,
+                    id: mockUser.id,
                     email: mockUser.email,
-                    userName: mockUser.userName,
                     firstName: mockUser.firstName,
                     lastName: mockUser.lastName,
                 },
@@ -79,9 +80,14 @@ describe('AuthController', () => {
 
             mockUserService.validateUserCredentials.mockResolvedValue(mockUser);
             mockAuthService.createTokenForUser.mockReturnValue(mockJwtPayload);
+            mockAuthService.createRefreshToken.mockResolvedValue('mock-refresh-token');
+
+            const mockResponse = {
+                cookie: jest.fn(),
+            } as unknown as Response;
 
             // Act
-            const result = await controller.login(loginDto);
+            const result = await controller.login(loginDto, mockResponse);
 
             // Assert
             expect(result).toEqual(mockJwtPayload);
@@ -100,9 +106,13 @@ describe('AuthController', () => {
 
             mockUserService.validateUserCredentials.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
 
+            const mockResponse = {
+                cookie: jest.fn(),
+            } as unknown as Response;
+
             // Act & Assert
-            await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
-            await expect(controller.login(loginDto)).rejects.toThrow('Invalid credentials');
+            await expect(controller.login(loginDto, mockResponse)).rejects.toThrow(UnauthorizedException);
+            await expect(controller.login(loginDto, mockResponse)).rejects.toThrow('Invalid credentials');
             expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(loginDto.email, loginDto.password);
             expect(mockAuthService.createTokenForUser).not.toHaveBeenCalled();
         });
@@ -116,8 +126,12 @@ describe('AuthController', () => {
 
             mockUserService.validateUserCredentials.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
 
+            const mockResponse = {
+                cookie: jest.fn(),
+            } as unknown as Response;
+
             // Act & Assert
-            await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
+            await expect(controller.login(loginDto, mockResponse)).rejects.toThrow(UnauthorizedException);
             expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(loginDto.email, loginDto.password);
         });
 
@@ -130,8 +144,12 @@ describe('AuthController', () => {
 
             mockUserService.validateUserCredentials.mockRejectedValue(new Error('Database connection error'));
 
+            const mockResponse = {
+                cookie: jest.fn(),
+            } as unknown as Response;
+
             // Act & Assert
-            await expect(controller.login(loginDto)).rejects.toThrow('Database connection error');
+            await expect(controller.login(loginDto, mockResponse)).rejects.toThrow('Database connection error');
             expect(mockUserService.validateUserCredentials).toHaveBeenCalledWith(loginDto.email, loginDto.password);
         });
     });
@@ -216,23 +234,28 @@ describe('AuthController', () => {
             } as OAuthRequest;
             const mockResponse = {
                 redirect: jest.fn(),
+                cookie: jest.fn(),
             } as unknown as Response;
             const mockToken = 'generated-jwt-token';
             const frontendUrl = 'http://localhost:3000';
 
-            mockAuthService.validateOAuthLogin.mockResolvedValue(mockToken);
+            const mockUser = UserFactory.create({ email: mockOAuthUser.email });
+            mockUserService.getUserByEmail.mockResolvedValue(mockUser);
+            mockAuthService.createRefreshToken.mockResolvedValue('mock-refresh-token');
             mockConfigService.get.mockReturnValue(frontendUrl);
 
             // Act
             await controller.googleAuthRedirect(mockRequest, mockResponse);
 
             // Assert
-            expect(mockAuthService.validateOAuthLogin).toHaveBeenCalledWith(mockOAuthUser);
+            expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockOAuthUser.email);
+            expect(mockAuthService.createRefreshToken).toHaveBeenCalledWith(mockUser.id);
             expect(mockConfigService.get).toHaveBeenCalledWith('frontend.url');
-            expect(mockResponse.redirect).toHaveBeenCalledWith(`${frontendUrl}/authenticated?token=${mockToken}`);
+            expect(mockResponse.cookie).toHaveBeenCalledWith('refreshToken', 'mock-refresh-token', expect.any(Object));
+            expect(mockResponse.redirect).toHaveBeenCalledWith(`${frontendUrl}/dashboard`);
         });
 
-        it('should handle OAuth validation errors', async () => {
+        it('should handle refresh token creation errors', async () => {
             // Arrange
             const mockOAuthUser = {
                 accessToken: 'oauth-access-token',
@@ -246,30 +269,53 @@ describe('AuthController', () => {
             } as OAuthRequest;
             const mockResponse = {
                 redirect: jest.fn(),
+                cookie: jest.fn(),
             } as unknown as Response;
+            const frontendUrl = 'http://localhost:3000';
 
-            mockAuthService.validateOAuthLogin.mockRejectedValue(new Error('OAuth validation failed'));
+            const mockUser = UserFactory.create({ email: mockOAuthUser.email });
+            mockUserService.getUserByEmail.mockResolvedValue(mockUser);
+            mockAuthService.createRefreshToken.mockRejectedValue(new Error('Refresh token creation failed'));
+            mockConfigService.get.mockReturnValue(frontendUrl);
 
-            // Act & Assert
-            await expect(controller.googleAuthRedirect(mockRequest, mockResponse)).rejects.toThrow(
-                'OAuth validation failed',
-            );
-            expect(mockAuthService.validateOAuthLogin).toHaveBeenCalledWith(mockOAuthUser);
-            expect(mockResponse.redirect).not.toHaveBeenCalled();
+            // Act
+            await controller.googleAuthRedirect(mockRequest, mockResponse);
+
+            // Assert
+            expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockOAuthUser.email);
+            expect(mockAuthService.createRefreshToken).toHaveBeenCalledWith(mockUser.id);
+            expect(mockResponse.redirect).toHaveBeenCalledWith(`${frontendUrl}/login`);
         });
 
-        it('should handle missing OAuth user data', async () => {
+        it('should handle non-existent user (null user)', async () => {
             // Arrange
-            const mockRequest = {
-                user: undefined,
-            } as unknown as OAuthRequest;
+            const mockOAuthUser = {
+                accessToken: 'oauth-access-token',
+                email: 'nonexistent@gmail.com',
+                firstName: 'Non',
+                lastName: 'Existent',
+                picture: 'https://example.com/picture.jpg',
+            };
+            const mockRequest: OAuthRequest = {
+                user: mockOAuthUser,
+            } as OAuthRequest;
             const mockResponse = {
                 redirect: jest.fn(),
+                cookie: jest.fn(),
             } as unknown as Response;
+            const frontendUrl = 'http://localhost:3000';
 
-            // Act & Assert
-            await expect(controller.googleAuthRedirect(mockRequest, mockResponse)).rejects.toThrow();
-            expect(mockAuthService.validateOAuthLogin).toHaveBeenCalledWith(undefined);
+            mockUserService.getUserByEmail.mockResolvedValue(null);
+            mockConfigService.get.mockReturnValue(frontendUrl);
+
+            // Act
+            await controller.googleAuthRedirect(mockRequest, mockResponse);
+
+            // Assert
+            expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockOAuthUser.email);
+            expect(mockAuthService.createRefreshToken).not.toHaveBeenCalled();
+            expect(mockResponse.cookie).toHaveBeenCalledWith('refreshToken', undefined, expect.any(Object));
+            expect(mockResponse.redirect).toHaveBeenCalledWith(`${frontendUrl}/dashboard`);
         });
     });
 
@@ -293,9 +339,8 @@ describe('AuthController', () => {
             const mockJwtPayload: JwtPayload = {
                 accessToken: 'token',
                 user: {
-                    userId: mockUser.id,
+                    id: mockUser.id,
                     email: mockUser.email,
-                    userName: mockUser.userName,
                     firstName: mockUser.firstName,
                     lastName: mockUser.lastName,
                 },
@@ -303,8 +348,13 @@ describe('AuthController', () => {
 
             mockUserService.validateUserCredentials.mockResolvedValue(mockUser);
             mockAuthService.createTokenForUser.mockReturnValue(mockJwtPayload);
+            mockAuthService.createRefreshToken.mockResolvedValue('mock-refresh-token');
 
-            const result = await controller.login(loginDto);
+            const mockResponse = {
+                cookie: jest.fn(),
+            } as unknown as Response;
+
+            const result = await controller.login(loginDto, mockResponse);
             expect(result).toBeDefined();
             expect(typeof result).toBe('object');
             expect(result.accessToken).toBeDefined();
