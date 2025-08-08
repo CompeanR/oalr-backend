@@ -439,6 +439,25 @@ src/
 4. **Dependency Injection** - All services follow NestJS DI patterns
 5. **Testability** - Each building block has comprehensive unit and integration tests
 
+### **Testing Guidelines (2025 Best Practices)**
+
+**❌ AVOID OVERTESTING:**
+- Don't test that services "are defined" 
+- Don't test property existence (`toHaveProperty`)
+- Don't test implementation details (private methods, internal state)
+- Don't test framework behavior (Date formats, config validation)
+- Don't access private properties via reflection
+- Don't test trivial getters/setters
+
+**✅ FOCUS ON BUSINESS LOGIC:**
+- Test core functionality and behavior
+- Test error scenarios that affect users
+- Test business rules and decision logic
+- Test integration points and data flow
+- Keep tests to 6-10 focused scenarios per service
+
+**Pattern: Test behavior, not implementation. Test what matters, not what exists.**
+
 ### **Environment Variables for Building Blocks**
 
 ```bash
