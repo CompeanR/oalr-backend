@@ -1,0 +1,56 @@
+# Development Docker ComposeVG
+# Run with: docker-compose -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+    # PostgreSQL Database
+    postgres:
+        image: postgres:15-alpine
+        container_name: oalr-postgres-dev
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: oalr
+            POSTGRES_USER: oalr
+            POSTGRES_PASSWORD: oalr123
+        ports:
+            - '5432:5432'
+        volumes:
+            - postgres_dev_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U oalr -d oalr']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    # NestJS Backend
+    backend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: oalr-backend-dev
+        restart: unless-stopped
+        environment:
+            NODE_ENV: development
+            PORT: 3000
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_USERNAME: oalr
+            DB_PASSWORD: oalr123
+            DB_NAME: oalr
+            JWT_SECRET_KEY: dev-secret-key-change-in-production
+            FRONTEND_URL: http://localhost:5173
+        ports:
+            - '3000:3000'
+        depends_on:
+            postgres:
+                condition: service_healthy
+        # For development: mount your source code for hot reload
+        volumes:
+            - .:/app
+            - /app/node_modules
+        # Override CMD for development (install all deps + hot reload)
+        command: sh -c "npm install && npm run start:dev"
+
+volumes:
+    postgres_dev_data:

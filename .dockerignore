@@ -1,0 +1,49 @@
+# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Build outputs
+dist
+build
+
+# Environment files (contain secrets!)
+.env
+.env.local
+.env.production
+.env.test
+
+# Development files
+.git
+.gitignore
+README.md
+CLAUDE.md
+
+# Testing
+coverage
+.nyc_output
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp
