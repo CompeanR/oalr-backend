@@ -1,12 +1,12 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { UserModule } from './modules/user/user.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 import { APP_FILTER } from '@nestjs/core';
-import { typeOrmConfig } from './core/database/ormconfig';
+import { createTypeOrmConfig } from './core/database/ormconfig';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 import configuration from './config/configuration';
@@ -23,7 +23,11 @@ import { SecurityMiddleware } from 'src/shared/middleware/security.middleware';
             load: [configuration],
             validate: validateEnvironment,
         }),
-        TypeOrmModule.forRoot(typeOrmConfig),
+        TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => createTypeOrmConfig(configService),
+            inject: [ConfigService],
+        }),
         ScheduleModule.forRoot(),
         AuthModule,
         HealthModule,
