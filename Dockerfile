@@ -25,9 +25,8 @@ RUN npm run build
 # This stage only has what's needed to RUN your app
 FROM node:20-alpine AS production
 
-# Add non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S -u 1001 -G nodejs nodejs
+# Use existing node user (ID 1000) from base image
+# No need to create new user - node:alpine already has it
 
 # Create app directory
 WORKDIR /app
@@ -45,11 +44,11 @@ COPY --from=builder /app/dist ./dist
 # Expose port 3000
 EXPOSE 3000
 
-# Change ownership of app files to nodejs user 
-RUN chown -R nodejs:nodejs /app 
+# Change ownership of app files to node user 
+RUN chown -R node:node /app 
 
 # Switch to non-root user
-USER nodejs
+USER node
 
 # Start the application using the compiled JavaScript
 CMD ["node", "dist/main"]
