@@ -14,10 +14,10 @@ class DashboardController {
     @UseGuards(AuthGuard('jwt'), RateLimitGuard)
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({ summary: 'Get dashboard statistics' })
-    @ApiResponse({ 
-        status: 200, 
-        description: 'Dashboard statistics retrieved successfully', 
-        type: DashboardStatsDto 
+    @ApiResponse({
+        status: 200,
+        description: 'Dashboard statistics retrieved successfully',
+        type: DashboardStatsDto,
     })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 429, description: 'Too many requests' })

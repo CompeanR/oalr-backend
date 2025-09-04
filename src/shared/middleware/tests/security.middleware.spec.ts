@@ -41,18 +41,15 @@ describe('SecurityMiddleware', () => {
 
             expect(mockResponse.setHeader).toHaveBeenCalledWith(
                 'Content-Security-Policy',
-                expect.stringContaining("default-src 'self'")
+                expect.stringContaining("default-src 'self'"),
             );
             expect(mockResponse.setHeader).toHaveBeenCalledWith('X-Frame-Options', 'DENY');
             expect(mockResponse.setHeader).toHaveBeenCalledWith('X-Content-Type-Options', 'nosniff');
             expect(mockResponse.setHeader).toHaveBeenCalledWith('X-XSS-Protection', '1; mode=block');
-            expect(mockResponse.setHeader).toHaveBeenCalledWith(
-                'Referrer-Policy', 
-                'strict-origin-when-cross-origin'
-            );
+            expect(mockResponse.setHeader).toHaveBeenCalledWith('Referrer-Policy', 'strict-origin-when-cross-origin');
             expect(mockResponse.setHeader).toHaveBeenCalledWith(
                 'Permissions-Policy',
-                expect.stringContaining('geolocation=()')
+                expect.stringContaining('geolocation=()'),
             );
         });
 
@@ -77,7 +74,7 @@ describe('SecurityMiddleware', () => {
 
             expect(mockResponse.setHeader).toHaveBeenCalledWith(
                 'Strict-Transport-Security',
-                'max-age=31536000; includeSubDomains; preload'
+                'max-age=31536000; includeSubDomains; preload',
             );
         });
 
@@ -86,10 +83,7 @@ describe('SecurityMiddleware', () => {
 
             middleware.use(mockRequest as Request, mockResponse as Response, mockNext);
 
-            expect(mockResponse.setHeader).not.toHaveBeenCalledWith(
-                'Strict-Transport-Security',
-                expect.any(String)
-            );
+            expect(mockResponse.setHeader).not.toHaveBeenCalledWith('Strict-Transport-Security', expect.any(String));
         });
     });
 
@@ -98,7 +92,7 @@ describe('SecurityMiddleware', () => {
             middleware.use(mockRequest as Request, mockResponse as Response, mockNext);
 
             const cspCall = (mockResponse.setHeader as jest.Mock).mock.calls.find(
-                call => call[0] === 'Content-Security-Policy'
+                (call) => call[0] === 'Content-Security-Policy',
             );
             const cspValue = cspCall[1];
 

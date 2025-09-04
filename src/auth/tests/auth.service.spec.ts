@@ -1,16 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { UserService } from 'src/modules/user/user.service';
-import { JwtService } from '@nestjs/jwt';
 import { UserFactory, mockJwtService, createTestingModule } from 'src/test/test-utils';
 import { TokenCreationException } from 'src/shared/exceptions/common.exception';
 import { OAuthUserDto } from 'src/modules/user/dto/oauth-user-dto';
 
 describe('AuthService', () => {
     let service: AuthService;
-    let userService: UserService;
-    let jwtService: JwtService;
 
     const mockUserService = {
         validateUserCredentials: jest.fn(),
@@ -30,8 +27,6 @@ describe('AuthService', () => {
         });
 
         service = module.get<AuthService>(AuthService);
-        userService = module.get<UserService>(UserService);
-        jwtService = module.get<JwtService>(JwtService);
 
         // Reset all mocks before each test
         jest.clearAllMocks();
@@ -156,10 +151,13 @@ describe('AuthService', () => {
                     lastName: 'User',
                 },
             });
-            expect(mockJwtService.sign).toHaveBeenCalledWith({
-                username: user.email,
-                sub: user.id,
-            }, { expiresIn: '15m' });
+            expect(mockJwtService.sign).toHaveBeenCalledWith(
+                {
+                    username: user.email,
+                    sub: user.id,
+                },
+                { expiresIn: '15m' },
+            );
         });
 
         it('should handle user with minimal information', () => {

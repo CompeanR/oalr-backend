@@ -29,10 +29,10 @@ describe('HealthService', () => {
 
         service = module.get<HealthService>(HealthService);
         jest.clearAllMocks();
-        
+
         // Reset memory usage to normal values for each test
         (process.memoryUsage as any) = jest.fn().mockReturnValue({
-            heapUsed: 50 * 1024 * 1024,  // 50MB
+            heapUsed: 50 * 1024 * 1024, // 50MB
             heapTotal: 100 * 1024 * 1024, // 100MB (50% usage)
             external: 0,
             arrayBuffers: 0,
@@ -48,7 +48,7 @@ describe('HealthService', () => {
         it('should return healthy status when all systems are operational', async () => {
             mockDataSource.query.mockResolvedValue([{ result: 1 }]);
 
-            const result = await service.getDetailedHealth() as any;
+            const result = (await service.getDetailedHealth()) as any;
 
             expect(result.status).toBe('healthy');
             expect(result.checks).toHaveProperty('database');
@@ -59,7 +59,7 @@ describe('HealthService', () => {
         it('should return unhealthy status when database fails', async () => {
             mockDataSource.query.mockRejectedValue(new Error('Connection failed'));
 
-            const result = await service.getDetailedHealth() as any;
+            const result = (await service.getDetailedHealth()) as any;
 
             expect(result.status).toBe('unhealthy');
         });
@@ -74,7 +74,7 @@ describe('HealthService', () => {
                 rss: 0,
             });
 
-            const result = await service.getDetailedHealth() as any;
+            const result = (await service.getDetailedHealth()) as any;
 
             expect(result.status).toBe('degraded');
         });
@@ -84,7 +84,7 @@ describe('HealthService', () => {
         it('should be ready when all checks pass', async () => {
             mockDataSource.query.mockResolvedValue([{ result: 1 }]);
 
-            const result = await service.getReadiness() as any;
+            const result = (await service.getReadiness()) as any;
 
             expect(result.status).toBe('ready');
         });
@@ -92,7 +92,7 @@ describe('HealthService', () => {
         it('should not be ready when database check fails', async () => {
             mockDataSource.query.mockRejectedValue(new Error('Database error'));
 
-            const result = await service.getReadiness() as any;
+            const result = (await service.getReadiness()) as any;
 
             expect(result.status).toBe('not_ready');
         });
@@ -102,7 +102,7 @@ describe('HealthService', () => {
         it('should handle database connection errors gracefully', async () => {
             mockDataSource.query.mockRejectedValue(new Error('Connection timeout'));
 
-            const result = await service.getDetailedHealth() as any;
+            const result = (await service.getDetailedHealth()) as any;
             const dbCheck = result.checks.database;
 
             expect(dbCheck.status).toBe('error');

@@ -89,9 +89,8 @@ class AuthService {
 
     public async validateRefreshToken(token: string): Promise<User> {
         // Verify JWT signature and expiration
-        let payload: any;
         try {
-            payload = this.jwtService.verify(token);
+            this.jwtService.verify(token);
         } catch {
             throw new UnauthorizedException('Invalid refresh token');
         }

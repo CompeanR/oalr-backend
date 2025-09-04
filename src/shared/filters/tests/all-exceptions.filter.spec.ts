@@ -130,14 +130,10 @@ describe('AllExceptionsFilter', () => {
 
     describe('database errors', () => {
         it('should handle duplicate entry database errors', () => {
-            const exception = new QueryFailedError(
-                'INSERT query',
-                [],
-                {
-                    code: DatabaseErrorCodes.DUPLICATE_ENTRY,
-                    detail: 'Key ("userName")=(testuser) already exists.',
-                } as any
-            );
+            const exception = new QueryFailedError('INSERT query', [], {
+                code: DatabaseErrorCodes.DUPLICATE_ENTRY,
+                detail: 'Key ("userName")=(testuser) already exists.',
+            } as any);
 
             filter.catch(exception as any, mockHost);
 
@@ -155,11 +151,10 @@ describe('AllExceptionsFilter', () => {
         });
 
         it('should handle other database errors', () => {
-            const exception = new QueryFailedError(
-                'SELECT query',
-                [],
-                { code: '42P01', detail: 'Table does not exist' } as any
-            );
+            const exception = new QueryFailedError('SELECT query', [], {
+                code: '42P01',
+                detail: 'Table does not exist',
+            } as any);
 
             filter.catch(exception as any, mockHost);
 
@@ -176,12 +171,9 @@ describe('AllExceptionsFilter', () => {
             expect(mockLogger.error).toHaveBeenCalledWith(
                 'Internal server error: Internal error',
                 expect.any(String),
-                'ExceptionFilter'
+                'ExceptionFilter',
             );
-            expect(mockLogger.debug).toHaveBeenCalledWith(
-                expect.stringContaining('Error context:'),
-                'ExceptionFilter'
-            );
+            expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('Error context:'), 'ExceptionFilter');
         });
 
         it('should log client errors as warning level', () => {
@@ -189,14 +181,8 @@ describe('AllExceptionsFilter', () => {
 
             filter.catch(exception as any, mockHost);
 
-            expect(mockLogger.warn).toHaveBeenCalledWith(
-                'Client error: Bad request',
-                'ExceptionFilter'
-            );
-            expect(mockLogger.debug).toHaveBeenCalledWith(
-                expect.stringContaining('Error context:'),
-                'ExceptionFilter'
-            );
+            expect(mockLogger.warn).toHaveBeenCalledWith('Client error: Bad request', 'ExceptionFilter');
+            expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('Error context:'), 'ExceptionFilter');
         });
 
         it('should log other exceptions as info level', () => {
@@ -204,10 +190,7 @@ describe('AllExceptionsFilter', () => {
 
             filter.catch(exception as any, mockHost);
 
-            expect(mockLogger.log).toHaveBeenCalledWith(
-                'Exception handled: Redirect',
-                'ExceptionFilter'
-            );
+            expect(mockLogger.log).toHaveBeenCalledWith('Exception handled: Redirect', 'ExceptionFilter');
         });
     });
 
@@ -263,14 +246,10 @@ describe('AllExceptionsFilter', () => {
         });
 
         it('should handle malformed database detail messages', () => {
-            const exception = new QueryFailedError(
-                'INSERT query',
-                [],
-                {
-                    code: DatabaseErrorCodes.DUPLICATE_ENTRY,
-                    detail: 'Malformed detail message',
-                } as any
-            );
+            const exception = new QueryFailedError('INSERT query', [], {
+                code: DatabaseErrorCodes.DUPLICATE_ENTRY,
+                detail: 'Malformed detail message',
+            } as any);
 
             filter.catch(exception as any, mockHost);
 

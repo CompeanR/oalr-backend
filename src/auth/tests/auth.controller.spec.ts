@@ -6,15 +6,11 @@ import { UserService } from 'src/modules/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from '../dto/login.dto';
 import { UserFactory, mockConfigService } from 'src/test/test-utils';
-import { User } from 'src/modules/user/entities/user.entity';
 import { JwtPayload, OAuthRequest } from '../interfaces';
 import { Response } from 'express';
 
 describe('AuthController', () => {
     let controller: AuthController;
-    let authService: AuthService;
-    let userService: UserService;
-    let configService: ConfigService;
 
     const mockAuthService = {
         validateOAuthLogin: jest.fn(),
@@ -48,9 +44,6 @@ describe('AuthController', () => {
         }).compile();
 
         controller = module.get<AuthController>(AuthController);
-        authService = module.get<AuthService>(AuthService);
-        userService = module.get<UserService>(UserService);
-        configService = module.get<ConfigService>(ConfigService);
 
         // Reset all mocks before each test
         jest.clearAllMocks();
@@ -236,7 +229,6 @@ describe('AuthController', () => {
                 redirect: jest.fn(),
                 cookie: jest.fn(),
             } as unknown as Response;
-            const mockToken = 'generated-jwt-token';
             const frontendUrl = 'http://localhost:3000';
 
             const mockUser = UserFactory.create({ email: mockOAuthUser.email });

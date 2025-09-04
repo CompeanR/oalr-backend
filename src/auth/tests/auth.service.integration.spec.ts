@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 
@@ -9,7 +9,6 @@ import { UserService } from 'src/modules/user/user.service';
 import { User } from 'src/modules/user/entities/user.entity';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { UnauthorizedException } from '@nestjs/common';
-import { TokenCreationException } from 'src/shared/exceptions/common.exception';
 import { OAuthUserDto } from 'src/modules/user/dto/oauth-user-dto';
 import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
 import configuration from 'src/config/configuration';
@@ -25,7 +24,7 @@ describe('AuthService Integration Tests', () => {
     const testDbConfig = {
         type: 'postgres' as const,
         host: 'localhost',
-        port: 5432,
+        port: 5433,
         username: 'oalr',
         password: 'oalr123',
         database: 'oalr_test', // Different database for tests
@@ -172,9 +171,6 @@ describe('AuthService Integration Tests', () => {
                 lastName: 'User',
                 picture: 'https://example.com/picture.jpg',
             };
-
-            // Create user first time (simulating previous OAuth registration)
-            const existingUser = await userService.createOAuthUser(oauthProfile);
 
             // Act - Test subsequent OAuth login
             const result = await authService.validateOAuthLogin(oauthProfile);

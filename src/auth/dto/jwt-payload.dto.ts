@@ -9,4 +9,3 @@ export class JwtPayloadDto {
     accessToken: string;
     user: JwtUserDto;
 }
-

@@ -162,5 +162,4 @@ describe('UserService', () => {
             expect(mockRepository.save).toHaveBeenCalledWith(createdUser);
         });
     });
-
 });
