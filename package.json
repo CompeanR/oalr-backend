@@ -18,10 +18,10 @@
         "test:cov": "jest --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
-        "generate-migration": "typeorm-ts-node-commonjs migration:generate -d ./src/core/database/data-source.ts ./src/core/database/migrations/$npm_config_name",
-        "run-migration": "typeorm-ts-node-commonjs migration:run -d ./src/core/database/data-source.ts",
-        "revert-migration": "typeorm-ts-node-commonjs migration:revert -d ./src/core/database/data-source.ts",
-        "db:reset": "typeorm-ts-node-commonjs schema:drop -d ./src/core/database/data-source.ts && npm run run-migration"
+        "generate-migration": "typeorm-ts-node-commonjs migration:generate -d ./src/core/database/typeorm-cli.config.ts ./src/core/database/migrations/$npm_config_name",
+        "run-migration": "typeorm-ts-node-commonjs migration:run -d ./src/core/database/typeorm-cli.config.ts",
+        "revert-migration": "typeorm-ts-node-commonjs migration:revert -d ./src/core/database/typeorm-cli.config.ts",
+        "db:reset": "typeorm-ts-node-commonjs schema:drop -d ./src/core/database/typeorm-cli.config.ts && npm run run-migration"
     },
     "dependencies": {
         "@nestjs/common": "^10.0.0",
@@ -37,6 +37,7 @@
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.0",
         "cookie-parser": "^1.4.7",
+        "dotenv": "^17.2.2",
         "passport": "^0.6.0",
         "passport-facebook": "^3.0.0",
         "passport-google-oauth20": "^2.0.0",
