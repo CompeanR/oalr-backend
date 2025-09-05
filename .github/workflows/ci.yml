@@ -45,12 +45,28 @@ jobs:
         runs-on: ubuntu-latest
         needs: code-quality # Run after code quality passes
 
+        services:
+            postgres:
+                image: postgres:15
+                env:
+                    POSTGRES_DB: template_test
+                    POSTGRES_USER: template
+                    POSTGRES_PASSWORD: template123
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
         env:
             NODE_ENV: test
             DB_HOST: localhost
-            DB_USERNAME: oalr
-            DB_PASSWORD: oalr123
-            DB_NAME: oalr_test
+            DB_USERNAME: template
+            DB_PASSWORD: template123
+            DB_PORT: 5432
+            DB_NAME: template_test
             JWT_SECRET_KEY: test-jwt-secret-for-ci-only
             GOOGLE_CLIENT_ID: test-google-client-id
             GOOGLE_CLIENT_SECRET: test-google-client-secret
