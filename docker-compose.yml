@@ -29,9 +29,9 @@ services:
         container_name: template-postgres-test
         restart: unless-stopped
         environment:
-            POSTGRES_DB: oalr_test
-            POSTGRES_USER: oalr
-            POSTGRES_PASSWORD: oalr123
+            POSTGRES_DB: template_test
+            POSTGRES_USER: template
+            POSTGRES_PASSWORD: template123
         ports:
             - '5433:5432' # Different port to avoid conflicts
         healthcheck:
