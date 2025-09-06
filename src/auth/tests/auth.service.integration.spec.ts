@@ -20,14 +20,13 @@ describe('AuthService Integration Tests', () => {
     let dataSource: DataSource;
     let module: TestingModule;
 
-    // Test database configuration
     const testDbConfig = {
         type: 'postgres' as const,
-        host: 'localhost',
-        port: 5433,
-        username: 'oalr',
-        password: 'oalr123',
-        database: 'oalr_test', // Different database for tests
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5433', 10),
+        username: process.env.DB_USERNAME || 'template',
+        password: process.env.DB_PASSWORD || 'template123',
+        database: process.env.DB_NAME || 'template_test',
         entities: [User, RefreshToken],
         synchronize: true, // Auto-sync schema for tests
         dropSchema: true, // Clean database on each test run
