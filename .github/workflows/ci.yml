@@ -40,6 +40,17 @@ jobs:
             - name: Build project
               run: npm run build
 
+            - name: Security Scanning
+              run: npm audit --audit-level=moderate
+              continue-on-error: false
+
+            - name: Secret Scanning
+              uses: trufflesecurity/trufflehog@main
+              with:
+                  path: ./
+                  base: main
+                  head: HEAD
+
     test:
         name: Run Tests
         runs-on: ubuntu-latest
